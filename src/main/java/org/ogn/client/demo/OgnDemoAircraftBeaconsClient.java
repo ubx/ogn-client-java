@@ -10,8 +10,8 @@ import org.ogn.client.OgnBeaconListener;
 import org.ogn.client.OgnClient;
 import org.ogn.client.OgnClientFactory;
 import org.ogn.client.OgnClientProperties;
-import org.ogn.commons.beacon.AddressType;
 import org.ogn.commons.beacon.AircraftBeacon;
+import org.ogn.commons.utils.JsonUtils;
 
 /**
  * A small demo program demonstrating the basic usage of the ogn-client.
@@ -29,13 +29,7 @@ public class OgnDemoAircraftBeaconsClient {
 
         @Override
         public void onUpdate(AircraftBeacon beacon) {
-            if (beacon.getAddressType() == AddressType.OGN) {
-                // out.println(JsonUtils.toJson(beacon));
-                if (last != null) {
-                    out.println("timedif: " + (beacon.getTimestamp() - last.getTimestamp()) + " ms");
-                }
-                last = beacon;
-            }
+            out.println(JsonUtils.toJson(beacon));
         }
     }
 
