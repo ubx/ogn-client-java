@@ -1,0 +1,389 @@
+/**
+ * Copyright (c) 2014 OGN, All Rights Reserved.
+ */
+
+package org.ogn.client.aprs;
+
+import static org.ogn.client.OgnClientConstants.OGN_CLIENT_DEFAULT_KEEP_ALIVE_INTERVAL_MS;
+import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_APP_NAME;
+import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_APP_VERSION;
+import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_APRS_PORT;
+import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_APRS_PORT_FILTERED;
+import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_RECONNECTION_TIMEOUT_MS;
+import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_SERVER_NAME;
+import static org.ogn.commons.utils.AprsUtils.formatAprsLoginLine;
+import static org.ogn.commons.utils.AprsUtils.generateClientId;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import org.ogn.client.OgnBeaconListener;
+import org.ogn.client.OgnClient;
+import org.ogn.commons.beacon.AircraftBeacon;
+import org.ogn.commons.beacon.OgnBeacon;
+import org.ogn.commons.beacon.ReceiverBeacon;
+import org.ogn.commons.beacon.impl.aprs.AprsLineParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * APRS implementation of the OGN client.
+ * 
+ * @author wbuczak
+ */
+public class AprsOgnClient implements OgnClient {
+
+    private static Logger LOG = LoggerFactory.getLogger(AprsOgnClient.class);
+
+    /**
+     * read only pass-code
+     * 
+     * @see <a href="http://www.aprs-is.net/Connecting.aspx">Connecting to APRS-IS</a>
+     */
+    private static final String READ_ONLY_PASSCODE = "-1";
+
+    private String aprsServerName;
+    private int aprsPort;
+    private int aprsPortFiltered;
+    private int reconnectionTimeout;
+    private int keepAlive;
+    private String appName;
+    private String appVersion;
+    private boolean processReceiverBeacons;
+    private boolean processAircraftBeacons;
+
+    private ExecutorService executor;
+    private ScheduledExecutorService scheduledExecutor;
+
+    private volatile Future<?> socketListenerFuture;
+    private volatile Future<?> pollerFuture;
+    private volatile Future<?> keepAliveFuture;
+
+    private class AprsSocketListenerTask implements Runnable {
+        private Logger SLLOG = LoggerFactory.getLogger(AprsSocketListenerTask.class);
+        private String aprsFilter;
+
+        private Socket socket;
+
+        public AprsSocketListenerTask(final String aprsFilter) {
+            this.aprsFilter = aprsFilter;
+        }
+
+        private void processAprsLine(final String line) {
+            aprsLines.offer(line);
+        }
+
+        @Override
+        public void run() {
+            SLLOG.debug("starting...");
+            boolean interrupted = false;
+
+            while (!interrupted) {
+
+                try {
+
+                    int port = aprsPort;
+                    String loginSentence = null;
+
+                    String clientId = generateClientId();
+                    if (null == aprsFilter) {
+                        loginSentence = formatAprsLoginLine(clientId, READ_ONLY_PASSCODE, appName, appVersion);
+                    } else {
+                        port = aprsPortFiltered;
+                        loginSentence = formatAprsLoginLine(clientId, READ_ONLY_PASSCODE, appName, appVersion,
+                                aprsFilter);
+                    }
+
+                    // if filter is specified connect to a different port
+                    LOG.info("connecting to server: {}:{}", aprsServerName, port);
+
+                    socket = new Socket(aprsServerName, port);
+
+                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                    LOG.debug("logging in as: {}", loginSentence);
+                    out.println(loginSentence);
+
+                    // start the keep-live msg sender
+                    startKeepAliveThread(out, loginSentence);
+
+                    BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    LOG.info("Connected. Waiting for data...");
+
+                    String line;
+                    while (!interrupted && (line = in.readLine()) != null) {
+                        if (Thread.currentThread().isInterrupted()) {
+                            interrupted = true;
+                            break;
+                        }
+
+                        processAprsLine(line);
+                    }
+
+                } catch (Exception e) {
+                    SLLOG.error("exception caught while trying to connect to {}:{}. retrying in {} ms", aprsServerName,
+                            aprsPort, reconnectionTimeout, e);
+                    try {
+                        Thread.sleep(reconnectionTimeout);
+                    } catch (InterruptedException ex) {
+                        SLLOG.debug("interrupted exception caught while waiting before trying to re-connect");
+                        interrupted = true;
+                    }
+                } finally {
+                    closeSocket();
+
+                    stopKeepAliveThread();
+                }
+
+            }// while
+
+            closeSocket();
+            SLLOG.debug("stoped.");
+
+        }// run
+
+        /**
+         * 
+         */
+        private void stopKeepAliveThread() {
+            if (keepAliveFuture != null) {
+                keepAliveFuture.cancel(true);
+            }
+        }
+
+        /**
+         * 
+         */
+        private void startKeepAliveThread(final PrintWriter out, final String msg) {
+            if (keepAliveFuture == null || keepAliveFuture.isCancelled()) {
+                keepAliveFuture = scheduledExecutor.scheduleAtFixedRate(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        String keepAliveMsg = msg.startsWith("#") ? msg : "#" + msg;
+                        try {
+                            LOG.debug("sending keep-alive message: {}", keepAliveMsg);
+                            out.println(keepAliveMsg);
+                        } catch (Exception ex) {
+                            LOG.warn("exception caught while tryint to send keep-alive msg", ex);
+                        }
+                    }
+                }, 0, keepAlive, TimeUnit.MILLISECONDS);
+            }
+        }
+
+        void closeSocket() {
+            try {
+                if (socket != null)
+                    socket.close();
+            } catch (IOException e) {
+                LOG.warn("could not close socket", e);
+            }
+        }
+    }
+
+    /**
+     * polls APRS sentences from aprsLines queue and processes them
+     * 
+     * @author wbuczak
+     */
+    private class PollerTask implements Runnable {
+        private Logger PLOG = LoggerFactory.getLogger(PollerTask.class);
+
+        @Override
+        public void run() {
+            PLOG.trace("starting...");
+            String aprsLine = null;
+            while (!Thread.interrupted()) {
+
+                try {
+                    aprsLine = aprsLines.take();
+                    PLOG.debug(aprsLine);
+                } catch (InterruptedException e) {
+                    PLOG.trace("interrupted exception caught. Was the poller task interrupted on purpose?");
+                    Thread.currentThread().interrupt();
+                    continue;
+                }
+
+                OgnBeacon beacon = AprsLineParser.get().parse(aprsLine, processAircraftBeacons, processReceiverBeacons);
+
+                // a beacon may be null in case in hasn't been parsed correctly or
+                // if a receivers or aircraft beacons parsing is disabled by user
+                if (beacon != null) {
+                    notifyAllListeners(beacon);
+                }
+            }// while
+            PLOG.trace("exiting..");
+        }
+
+    }
+
+    private AprsOgnClient(Builder builder) {
+        this.aprsServerName = builder.aprsServerName;
+        this.aprsPort = builder.aprsPort;
+        this.aprsPortFiltered = builder.aprsPortFiltered;
+        this.reconnectionTimeout = builder.reconnectionTimeout;
+        this.keepAlive = builder.keepAlive;
+        this.appName = builder.appName;
+        this.appVersion = builder.appVersion;
+        // user may disable processing receivers beacons (to gain performance if rec.beacons are not needed)
+        this.processReceiverBeacons = !builder.ignoreReceiverBeacons;
+        // user may disable processing receivers beacons (to gain performance if rec.beacons are not needed)
+        this.processAircraftBeacons = !builder.ignoreAircraftBeacons;
+
+    }
+
+    public static class Builder {
+        private String aprsServerName = OGN_DEFAULT_SERVER_NAME;
+        private int aprsPort = OGN_DEFAULT_APRS_PORT;
+        private int aprsPortFiltered = OGN_DEFAULT_APRS_PORT_FILTERED;
+        private int reconnectionTimeout = OGN_DEFAULT_RECONNECTION_TIMEOUT_MS;
+        private int keepAlive = OGN_CLIENT_DEFAULT_KEEP_ALIVE_INTERVAL_MS;
+        private String appName = OGN_DEFAULT_APP_NAME;
+        private String appVersion = OGN_DEFAULT_APP_VERSION;
+        private boolean ignoreReceiverBeacons = false;
+        private boolean ignoreAircraftBeacons = false;
+
+        public Builder serverName(final String name) {
+            this.aprsServerName = name;
+            return this;
+        }
+
+        public Builder aprsPort(final int port) {
+            this.aprsPort = port;
+            return this;
+        }
+
+        public Builder aprsPortFiltered(final int port) {
+            this.aprsPortFiltered = port;
+            return this;
+        }
+
+        public Builder reconnectionTimeout(final int timeout) {
+            this.reconnectionTimeout = timeout;
+            return this;
+        }
+
+        public Builder appName(final String name) {
+            this.appName = name;
+            return this;
+        }
+
+        public Builder appVersion(final String version) {
+            this.appVersion = version;
+            return this;
+        }
+
+        public Builder keepAlive(final int keepAliveInt) {
+            this.keepAlive = keepAliveInt;
+            return this;
+        }
+
+        public Builder ignoreReceiverBeacons(final boolean flag) {
+            this.ignoreReceiverBeacons = flag;
+            return this;
+        }
+
+        public Builder ignoreAicraftrBeacons(final boolean flag) {
+            this.ignoreAircraftBeacons = flag;
+            return this;
+        }
+
+        public AprsOgnClient build() {
+            return new AprsOgnClient(this);
+        }
+
+    }
+
+    private CopyOnWriteArrayList<OgnBeaconListener<AircraftBeacon>> acBeaconListeners = new CopyOnWriteArrayList<>();
+    private CopyOnWriteArrayList<OgnBeaconListener<ReceiverBeacon>> brBeaconListeners = new CopyOnWriteArrayList<>();
+
+    private BlockingQueue<String> aprsLines = new LinkedBlockingQueue<>();
+
+    @Override
+    public synchronized void connect(final String aprsFilter) {
+
+        executor = Executors.newCachedThreadPool();
+        scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+
+        if (socketListenerFuture == null) {
+            pollerFuture = executor.submit(new PollerTask());
+            socketListenerFuture = executor.submit(new AprsSocketListenerTask(aprsFilter));
+        } else {
+            LOG.warn("client is currently connected and running. stop it first");
+        }
+    }
+
+    @Override
+    public void connect() {
+        connect(null);
+    }
+
+    @Override
+    public synchronized void disconnect() {
+        if (socketListenerFuture != null) {
+
+            socketListenerFuture.cancel(true);
+            socketListenerFuture = null;
+
+            pollerFuture.cancel(true);
+            pollerFuture = null;
+
+            keepAliveFuture.cancel(true);
+            keepAliveFuture = null;
+        }
+
+        if (executor != null)
+            executor.shutdownNow();
+
+        if (scheduledExecutor != null)
+            scheduledExecutor.shutdownNow();
+
+    }
+
+    @Override
+    public void subscribeToAircraftBeacons(OgnBeaconListener<AircraftBeacon> listener) {
+        acBeaconListeners.addIfAbsent(listener);
+    }
+
+    @Override
+    public void subscribeToReceiverBeacons(OgnBeaconListener<ReceiverBeacon> listener) {
+        brBeaconListeners.addIfAbsent(listener);
+    }
+
+    @Override
+    public void unsubscribeFromAircraftBeacons(OgnBeaconListener<AircraftBeacon> listener) {
+        acBeaconListeners.remove(listener);
+    }
+
+    @Override
+    public void unsubscribeFromReceiverBeacons(OgnBeaconListener<ReceiverBeacon> listener) {
+        brBeaconListeners.remove(listener);
+    }
+
+    private <T extends OgnBeacon> void notifyAllListeners(T ognBeacon) {
+        if (ognBeacon instanceof AircraftBeacon) {
+            for (OgnBeaconListener<AircraftBeacon> listener : acBeaconListeners) {
+                listener.onUpdate((AircraftBeacon) ognBeacon);
+            }
+
+        } else if (ognBeacon instanceof ReceiverBeacon) {
+            for (OgnBeaconListener<ReceiverBeacon> listener : brBeaconListeners) {
+                listener.onUpdate((ReceiverBeacon) ognBeacon);
+            }
+        } else {
+            LOG.warn("unrecognized beacon type: {} .ignoring..", ognBeacon.getClass().getName());
+        }
+    }
+
+}
