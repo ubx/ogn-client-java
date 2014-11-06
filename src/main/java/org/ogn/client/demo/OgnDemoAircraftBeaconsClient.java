@@ -21,6 +21,8 @@ import org.ogn.commons.utils.JsonUtils;
 public class OgnDemoAircraftBeaconsClient {
 
     static {
+        // ignore parsing receiver beacons, we are not interested in them in this demo and there is 
+        // no point in wasting CPU on that
         System.setProperty(OgnClientProperties.PROP_OGN_CLIENT_IGNORE_RECEIVER_BEACONS, "true");
     }
 
