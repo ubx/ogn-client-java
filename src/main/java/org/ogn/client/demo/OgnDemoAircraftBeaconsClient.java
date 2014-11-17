@@ -27,8 +27,6 @@ public class OgnDemoAircraftBeaconsClient {
     }
 
     static class AircraftBeaconListener implements OgnBeaconListener<AircraftBeacon> {
-        AircraftBeacon last = null;
-
         @Override
         public void onUpdate(AircraftBeacon beacon) {
             out.println(JsonUtils.toJson(beacon));
