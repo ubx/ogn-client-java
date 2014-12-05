@@ -13,8 +13,6 @@ import org.ogn.client.OgnClientProperties;
 import org.ogn.commons.beacon.AircraftBeacon;
 import org.ogn.commons.beacon.AircraftDescriptor;
 import org.ogn.commons.utils.JsonUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A small demo program demonstrating the basic usage of the ogn-client.
@@ -29,23 +27,29 @@ public class OgnDemoAircraftBeaconsClient {
         System.setProperty(OgnClientProperties.PROP_OGN_CLIENT_IGNORE_RECEIVER_BEACONS, "true");
     }
 
-    private static Logger LOG = LoggerFactory.getLogger("PacketsLogger");
-
     static class AcListener implements AircraftBeaconListener {
         @Override
         public void onUpdate(AircraftBeacon beacon, AircraftDescriptor descriptor) {
-            String json = JsonUtils.toJson(beacon);
-            out.println(json);
-            LOG.info(json);
+            out.println("*********************************************");
+            
+            // print the beacon
+            out.println(JsonUtils.toJson(beacon));
+            
+            // if descriptor is available then print it too
+            if (descriptor != null) {
+                out.println(JsonUtils.toJson(descriptor));
+            }
+            
+            out.println("*********************************************");
         }
     }
 
     public static void main(String[] args) throws Exception {
-        OgnClient client = OgnClientFactory.createClient();
+        OgnClient client = OgnClientFactory.createClient();        
 
         System.out.println("connecting...");
-        // client.connect("r/+51.537/+5.472/250");
 
+        // client.connect("r/+51.537/+5.472/250");
         // client.connect("r/+49.782/+19.450/200");
 
         client.connect();
