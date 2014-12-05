@@ -6,12 +6,15 @@ package org.ogn.client.demo;
 
 import static java.lang.System.out;
 
-import org.ogn.client.OgnBeaconListener;
+import org.ogn.client.AircraftBeaconListener;
 import org.ogn.client.OgnClient;
 import org.ogn.client.OgnClientFactory;
 import org.ogn.client.OgnClientProperties;
 import org.ogn.commons.beacon.AircraftBeacon;
+import org.ogn.commons.beacon.AircraftDescriptor;
 import org.ogn.commons.utils.JsonUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A small demo program demonstrating the basic usage of the ogn-client.
@@ -21,15 +24,19 @@ import org.ogn.commons.utils.JsonUtils;
 public class OgnDemoAircraftBeaconsClient {
 
     static {
-        // ignore parsing receiver beacons, we are not interested in them in this demo and there is 
+        // ignore parsing receiver beacons, we are not interested in them in this demo and there is
         // no point in wasting CPU on that
         System.setProperty(OgnClientProperties.PROP_OGN_CLIENT_IGNORE_RECEIVER_BEACONS, "true");
     }
 
-    static class AircraftBeaconListener implements OgnBeaconListener<AircraftBeacon> {
+    private static Logger LOG = LoggerFactory.getLogger("PacketsLogger");
+
+    static class AcListener implements AircraftBeaconListener {
         @Override
-        public void onUpdate(AircraftBeacon beacon) {
-            out.println(JsonUtils.toJson(beacon));
+        public void onUpdate(AircraftBeacon beacon, AircraftDescriptor descriptor) {
+            String json = JsonUtils.toJson(beacon);
+            out.println(json);
+            LOG.info(json);
         }
     }
 
@@ -39,9 +46,11 @@ public class OgnDemoAircraftBeaconsClient {
         System.out.println("connecting...");
         // client.connect("r/+51.537/+5.472/250");
 
+        // client.connect("r/+49.782/+19.450/200");
+
         client.connect();
 
-        client.subscribeToAircraftBeacons(new AircraftBeaconListener());
+        client.subscribeToAircraftBeacons(new AcListener());
 
         Thread.sleep(Long.MAX_VALUE);
     }

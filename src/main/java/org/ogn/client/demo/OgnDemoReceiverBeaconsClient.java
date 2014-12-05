@@ -6,10 +6,10 @@ package org.ogn.client.demo;
 
 import static java.lang.System.out;
 
-import org.ogn.client.OgnBeaconListener;
 import org.ogn.client.OgnClient;
 import org.ogn.client.OgnClientFactory;
 import org.ogn.client.OgnClientProperties;
+import org.ogn.client.ReceiverBeaconListener;
 import org.ogn.commons.beacon.ReceiverBeacon;
 import org.ogn.commons.utils.JsonUtils;
 
@@ -21,14 +21,16 @@ import org.ogn.commons.utils.JsonUtils;
 public class OgnDemoReceiverBeaconsClient {
 
     static {
-        // ignore parsing aircraft beacons, we are not interested in them in this demo and there is 
+        // ignore parsing aircraft beacons, we are not interested in them in this demo and there is
         // no point in wasting CPU on that
         System.setProperty(OgnClientProperties.PROP_OGN_CLIENT_IGNORE_AIRCRAFT_BEACONS, "true");
     }
 
-    static class BaseRadioBeaconListener implements OgnBeaconListener<ReceiverBeacon> {
+    static class RbListener implements ReceiverBeaconListener {
         @Override
         public void onUpdate(ReceiverBeacon beacon) {
+            // if (beacon.getId().equals("LeNoiray"))
+            // if (beacon.getNumericVersion() > 0)
             out.println(JsonUtils.toJson(beacon));
         }
     }
@@ -41,7 +43,7 @@ public class OgnDemoReceiverBeaconsClient {
 
         client.connect();
 
-        client.subscribeToReceiverBeacons(new BaseRadioBeaconListener());
+        client.subscribeToReceiverBeacons(new RbListener());
 
         Thread.sleep(Long.MAX_VALUE);
 

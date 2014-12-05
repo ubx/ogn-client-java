@@ -28,11 +28,14 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.ogn.client.OgnBeaconListener;
+import org.ogn.client.AircraftBeaconListener;
 import org.ogn.client.OgnClient;
+import org.ogn.client.ReceiverBeaconListener;
 import org.ogn.commons.beacon.AircraftBeacon;
+import org.ogn.commons.beacon.AircraftDescriptor;
 import org.ogn.commons.beacon.OgnBeacon;
 import org.ogn.commons.beacon.ReceiverBeacon;
+import org.ogn.commons.beacon.descriptor.AircraftDescriptorProvider;
 import org.ogn.commons.beacon.impl.aprs.AprsLineParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +65,8 @@ public class AprsOgnClient implements OgnClient {
     private String appVersion;
     private boolean processReceiverBeacons;
     private boolean processAircraftBeacons;
+
+    private AircraftDescriptorProvider descriptorProvider;
 
     private ExecutorService executor;
     private ScheduledExecutorService scheduledExecutor;
@@ -305,8 +310,8 @@ public class AprsOgnClient implements OgnClient {
 
     }
 
-    private CopyOnWriteArrayList<OgnBeaconListener<AircraftBeacon>> acBeaconListeners = new CopyOnWriteArrayList<>();
-    private CopyOnWriteArrayList<OgnBeaconListener<ReceiverBeacon>> brBeaconListeners = new CopyOnWriteArrayList<>();
+    private CopyOnWriteArrayList<AircraftBeaconListener> acBeaconListeners = new CopyOnWriteArrayList<>();
+    private CopyOnWriteArrayList<ReceiverBeaconListener> brBeaconListeners = new CopyOnWriteArrayList<>();
 
     private BlockingQueue<String> aprsLines = new LinkedBlockingQueue<>();
 
@@ -352,38 +357,39 @@ public class AprsOgnClient implements OgnClient {
     }
 
     @Override
-    public void subscribeToAircraftBeacons(OgnBeaconListener<AircraftBeacon> listener) {
+    public void subscribeToAircraftBeacons(AircraftBeaconListener listener) {
         acBeaconListeners.addIfAbsent(listener);
     }
 
     @Override
-    public void subscribeToReceiverBeacons(OgnBeaconListener<ReceiverBeacon> listener) {
+    public void subscribeToReceiverBeacons(ReceiverBeaconListener listener) {
         brBeaconListeners.addIfAbsent(listener);
     }
 
     @Override
-    public void unsubscribeFromAircraftBeacons(OgnBeaconListener<AircraftBeacon> listener) {
+    public void unsubscribeFromAircraftBeacons(AircraftBeaconListener listener) {
         acBeaconListeners.remove(listener);
     }
 
     @Override
-    public void unsubscribeFromReceiverBeacons(OgnBeaconListener<ReceiverBeacon> listener) {
+    public void unsubscribeFromReceiverBeacons(ReceiverBeaconListener listener) {
         brBeaconListeners.remove(listener);
     }
 
     private <T extends OgnBeacon> void notifyAllListeners(T ognBeacon) {
         if (ognBeacon instanceof AircraftBeacon) {
-            for (OgnBeaconListener<AircraftBeacon> listener : acBeaconListeners) {
-                listener.onUpdate((AircraftBeacon) ognBeacon);
+            for (AircraftBeaconListener listener : acBeaconListeners) {
+                AircraftBeacon ab = (AircraftBeacon) ognBeacon;
+                AircraftDescriptor descriptor = descriptorProvider == null ? null : descriptorProvider.getDescritor(ab);
+                listener.onUpdate(ab, descriptor);
             }
 
         } else if (ognBeacon instanceof ReceiverBeacon) {
-            for (OgnBeaconListener<ReceiverBeacon> listener : brBeaconListeners) {
+            for (ReceiverBeaconListener listener : brBeaconListeners) {
                 listener.onUpdate((ReceiverBeacon) ognBeacon);
             }
         } else {
             LOG.warn("unrecognized beacon type: {} .ignoring..", ognBeacon.getClass().getName());
         }
     }
-
 }

@@ -18,10 +18,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.ogn.client.OgnBeaconListener;
+import org.ogn.client.AircraftBeaconListener;
 import org.ogn.client.OgnClient;
 import org.ogn.client.OgnClientFactory;
+import org.ogn.client.ReceiverBeaconListener;
 import org.ogn.commons.beacon.AircraftBeacon;
+import org.ogn.commons.beacon.AircraftDescriptor;
 import org.ogn.commons.beacon.ReceiverBeacon;
 
 public class OgnAprsClientTest {
@@ -37,24 +39,24 @@ public class OgnAprsClientTest {
 
     TcpMockAprsServer aprsServer;
 
-    static class AcListener implements OgnBeaconListener<AircraftBeacon> {
+    static class AcListener implements AircraftBeaconListener {
 
         List<AircraftBeacon> beacons = new ArrayList<>();
 
         @Override
-        public void onUpdate(AircraftBeacon beacon) {
+        public void onUpdate(AircraftBeacon beacon, AircraftDescriptor descriptor) {
             beacons.add(beacon);
         }
-    };
+    }
 
-    static class RbListener implements OgnBeaconListener<ReceiverBeacon> {
+    static class RbListener implements ReceiverBeaconListener {
         List<ReceiverBeacon> beacons = new ArrayList<>();
 
         @Override
         public void onUpdate(ReceiverBeacon beacon) {
             beacons.add(beacon);
         }
-    };
+    }
 
     @BeforeClass
     public static void classSetUp() throws Exception {

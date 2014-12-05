@@ -4,9 +4,6 @@
 
 package org.ogn.client;
 
-import org.ogn.commons.beacon.AircraftBeacon;
-import org.ogn.commons.beacon.ReceiverBeacon;
-
 public interface OgnClient {
 
     /**
@@ -14,28 +11,28 @@ public interface OgnClient {
      * 
      * @param listener
      */
-    void subscribeToAircraftBeacons(OgnBeaconListener<AircraftBeacon> listener);
+    void subscribeToAircraftBeacons(AircraftBeaconListener listener);
 
     /**
      * unsubscribes a listener from receiving aircraft beacons
      * 
      * @param listener
      */
-    void unsubscribeFromAircraftBeacons(OgnBeaconListener<AircraftBeacon> listener);
+    void unsubscribeFromAircraftBeacons(AircraftBeaconListener listener);
 
     /**
      * subscribes a listener to the base stations beacons
      * 
      * @param listener
      */
-    void subscribeToReceiverBeacons(OgnBeaconListener<ReceiverBeacon> listener);
+    void subscribeToReceiverBeacons(ReceiverBeaconListener listener);
 
     /**
      * unsubscribes a listener from receiving base stations beacons
      * 
      * @param listener
      */
-    void unsubscribeFromReceiverBeacons(OgnBeaconListener<ReceiverBeacon> listener);
+    void unsubscribeFromReceiverBeacons(ReceiverBeaconListener listener);
 
     /**
      * connects the client to the OGN APRS service (no filtering)
