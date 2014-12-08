@@ -59,7 +59,7 @@ public class OgnDemoAircraftBeaconsClient2 {
     static class MyCustomAircraftDescriptorProvider implements AircraftDescriptorProvider {
 
         @Override
-        public AircraftDescriptor getDescritor(AircraftBeacon beacon) {
+        public AircraftDescriptor getDescritor(String address) {
             return new AircraftDescriptorImpl("SP-NZA", "ZA", "Private", "EPML", "Cessna 172S", "122.500");
         }
 
@@ -76,8 +76,8 @@ public class OgnDemoAircraftBeaconsClient2 {
         // put the two descriptors into a list
         // NOTE: the order matters. The OGN client will try to query for the aircraft information the first provider
         // in the list. Only if no match is found it will continue with the second provider etc..
-        List<AircraftDescriptorProvider> aircraftDescProviders = Arrays.asList(new AircraftDescriptorProvider[] { adp,
-                adp2 });
+        List<AircraftDescriptorProvider> aircraftDescProviders = Arrays.asList(new AircraftDescriptorProvider[] { adp, adp2
+                });
 
         // create ogn client and give it the previously created descriptor providers
         OgnClient client = OgnClientFactory.createClient(aircraftDescProviders);
