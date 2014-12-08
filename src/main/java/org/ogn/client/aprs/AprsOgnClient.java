@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -67,7 +68,7 @@ public class AprsOgnClient implements OgnClient {
     private boolean processReceiverBeacons;
     private boolean processAircraftBeacons;
 
-    private AircraftDescriptorProvider descriptorProvider;
+    private AircraftDescriptorProvider[] descriptorProviders;
 
     private ExecutorService executor;
     private ScheduledExecutorService scheduledExecutor;
@@ -247,6 +248,9 @@ public class AprsOgnClient implements OgnClient {
         // user may disable processing receivers beacons (to gain performance if rec.beacons are not needed)
         this.processAircraftBeacons = !builder.ignoreAircraftBeacons;
 
+        // aircraft descriptor providers are not mandatory
+        if (builder.descriptorProviders != null)
+            this.descriptorProviders = builder.descriptorProviders.toArray(new AircraftDescriptorProvider[0]);
     }
 
     public static class Builder {
@@ -259,6 +263,8 @@ public class AprsOgnClient implements OgnClient {
         private String appVersion = OGN_DEFAULT_APP_VERSION;
         private boolean ignoreReceiverBeacons = false;
         private boolean ignoreAircraftBeacons = false;
+
+        private List<AircraftDescriptorProvider> descriptorProviders;
 
         public Builder serverName(final String name) {
             this.aprsServerName = name;
@@ -302,6 +308,11 @@ public class AprsOgnClient implements OgnClient {
 
         public Builder ignoreAicraftrBeacons(final boolean flag) {
             this.ignoreAircraftBeacons = flag;
+            return this;
+        }
+
+        public Builder setAircraftDescriptorProviders(List<AircraftDescriptorProvider> descriptorProviders) {
+            this.descriptorProviders = descriptorProviders;
             return this;
         }
 
@@ -377,12 +388,28 @@ public class AprsOgnClient implements OgnClient {
         brBeaconListeners.remove(listener);
     }
 
+    private AircraftDescriptor findAircraftDescriptor(AircraftBeacon beacon) {
+        AircraftDescriptor result = AircraftDescriptorImpl.UNKNOWN_AIRCRAFT_DESCRIPTOR;
+        if (descriptorProviders != null) {
+            for (AircraftDescriptorProvider provider : descriptorProviders) {
+                AircraftDescriptor ad = provider.getDescritor(beacon);
+
+                if (ad != null) {
+                    result = ad;
+                    break;
+                }
+            }// for
+        }
+
+        return result;
+    }
+
     private <T extends OgnBeacon> void notifyAllListeners(T ognBeacon) {
         if (ognBeacon instanceof AircraftBeacon) {
             for (AircraftBeaconListener listener : acBeaconListeners) {
                 AircraftBeacon ab = (AircraftBeacon) ognBeacon;
-                AircraftDescriptor descriptor = descriptorProvider == null ? AircraftDescriptorImpl.UNKNOWN_AIRCRAFT_DESCRIPTOR
-                        : descriptorProvider.getDescritor(ab);
+                AircraftDescriptor descriptor = findAircraftDescriptor(ab);
+
                 listener.onUpdate(ab, descriptor);
             }
 
