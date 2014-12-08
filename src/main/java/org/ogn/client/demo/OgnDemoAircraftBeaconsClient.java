@@ -31,21 +31,21 @@ public class OgnDemoAircraftBeaconsClient {
         @Override
         public void onUpdate(AircraftBeacon beacon, AircraftDescriptor descriptor) {
             out.println("*********************************************");
-            
+
             // print the beacon
             out.println(JsonUtils.toJson(beacon));
-            
-            // if descriptor is available then print it too
-            if (descriptor != null) {
+
+            // if the aircraft has been recognized print its descriptor too
+            if (descriptor.isKnown()) {
                 out.println(JsonUtils.toJson(descriptor));
             }
-            
+
             out.println("*********************************************");
         }
     }
 
     public static void main(String[] args) throws Exception {
-        OgnClient client = OgnClientFactory.createClient();        
+        OgnClient client = OgnClientFactory.createClient();
 
         System.out.println("connecting...");
 

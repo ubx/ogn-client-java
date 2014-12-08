@@ -30,7 +30,7 @@ public class OgnDemoReceiverBeaconsClient {
         @Override
         public void onUpdate(ReceiverBeacon beacon) {
             // if (beacon.getId().equals("LeNoiray"))
-            // if (beacon.getNumericVersion() > 0)
+            if (beacon.getNumericVersion() > 0)
             out.println(JsonUtils.toJson(beacon));
         }
     }

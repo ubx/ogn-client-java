@@ -21,7 +21,10 @@ import static org.ogn.client.OgnClientProperties.PROP_OGN_SRV_PORT_FILTERED;
 import static org.ogn.client.OgnClientProperties.PROP_OGN_SRV_PORT_UNFILTERED;
 import static org.ogn.client.OgnClientProperties.PROP_OGN_SRV_RECONNECTION_TIMEOUT;
 
+import java.util.List;
+
 import org.ogn.client.aprs.AprsOgnClient;
+import org.ogn.commons.beacon.descriptor.AircraftDescriptorProvider;
 
 /**
  * This factory creates instances of OGN client. Several parameters can be tuned through the environment variables.
@@ -50,6 +53,11 @@ public class OgnClientFactory {
         return new AprsOgnClient.Builder().serverName(serverName).aprsPort(port).aprsPortFiltered(portFiltered)
                 .reconnectionTimeout(reconnectionTimeout).appName(appName).appVersion(appVersion).keepAlive(keepAliveInterval)
                 .ignoreReceiverBeacons(ignoreReceiverBeacons).ignoreAicraftrBeacons(ignoreAircraftBeacons).build();
+    }
+    
+    public static OgnClient createClient(List<AircraftDescriptorProvider> aircraftDescriptorProvider) {
+        return null;
+        
     }
 
 }

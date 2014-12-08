@@ -36,6 +36,7 @@ import org.ogn.commons.beacon.AircraftDescriptor;
 import org.ogn.commons.beacon.OgnBeacon;
 import org.ogn.commons.beacon.ReceiverBeacon;
 import org.ogn.commons.beacon.descriptor.AircraftDescriptorProvider;
+import org.ogn.commons.beacon.impl.AircraftDescriptorImpl;
 import org.ogn.commons.beacon.impl.aprs.AprsLineParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -380,7 +381,8 @@ public class AprsOgnClient implements OgnClient {
         if (ognBeacon instanceof AircraftBeacon) {
             for (AircraftBeaconListener listener : acBeaconListeners) {
                 AircraftBeacon ab = (AircraftBeacon) ognBeacon;
-                AircraftDescriptor descriptor = descriptorProvider == null ? null : descriptorProvider.getDescritor(ab);
+                AircraftDescriptor descriptor = descriptorProvider == null ? AircraftDescriptorImpl.UNKNOWN_AIRCRAFT_DESCRIPTOR
+                        : descriptorProvider.getDescritor(ab);
                 listener.onUpdate(ab, descriptor);
             }
 
