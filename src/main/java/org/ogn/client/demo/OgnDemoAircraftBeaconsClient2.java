@@ -52,7 +52,7 @@ public class OgnDemoAircraftBeaconsClient2 {
 
     /**
      * A custom descriptor provider. For the use of this demo this custom descriptor provider always returns the
-     * same descriptor, no matter what beacon is passed to it
+     * same descriptor, no matter what address is passed to it
      * 
      * @author wbuczak
      */
@@ -60,6 +60,7 @@ public class OgnDemoAircraftBeaconsClient2 {
 
         @Override
         public AircraftDescriptor getDescritor(String address) {
+            // return always the same descriptor (just for this demo)
             return new AircraftDescriptorImpl("SP-NZA", "ZA", "Private", "EPML", "Cessna 172S", "122.500");
         }
 
