@@ -329,15 +329,13 @@ public class AprsOgnClient implements OgnClient {
 
     @Override
     public synchronized void connect(final String aprsFilter) {
-
-        executor = Executors.newCachedThreadPool();
-        scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
-
         if (socketListenerFuture == null) {
+            executor = Executors.newCachedThreadPool();
+            scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
             pollerFuture = executor.submit(new PollerTask());
             socketListenerFuture = executor.submit(new AprsSocketListenerTask(aprsFilter));
         } else {
-            LOG.warn("client is currently connected and running. stop it first");
+            LOG.warn("client is currently connected and running. stop it first!");
         }
     }
 

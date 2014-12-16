@@ -86,6 +86,7 @@ public class OgnAprsClientTest {
 
         OgnClient client = OgnClientFactory.createClient();
         client.connect();
+        client.connect();
 
         AcListener acListener = new AcListener();
         RbListener rbListener = new RbListener();
