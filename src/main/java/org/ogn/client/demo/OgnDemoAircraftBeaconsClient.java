@@ -12,6 +12,7 @@ import org.ogn.client.OgnClientFactory;
 import org.ogn.client.OgnClientProperties;
 import org.ogn.commons.beacon.AircraftBeacon;
 import org.ogn.commons.beacon.AircraftDescriptor;
+import org.ogn.commons.igc.IgcLogger;
 import org.ogn.commons.utils.JsonUtils;
 
 /**
@@ -27,7 +28,13 @@ public class OgnDemoAircraftBeaconsClient {
         System.setProperty(OgnClientProperties.PROP_OGN_CLIENT_IGNORE_RECEIVER_BEACONS, "true");
     }
 
+    static IgcLogger igcLogger = new IgcLogger();
+
+    // enable if you want to log to IGC files
+    static boolean logIGC = false;
+
     static class AcListener implements AircraftBeaconListener {
+
         @Override
         public void onUpdate(AircraftBeacon beacon, AircraftDescriptor descriptor) {
             out.println("*********************************************");
@@ -39,6 +46,16 @@ public class OgnDemoAircraftBeaconsClient {
             if (descriptor.isKnown()) {
                 out.println(JsonUtils.toJson(descriptor));
             }
+
+            if (logIGC) {
+
+                if (descriptor.isKnown())
+                    igcLogger.log(descriptor.getRegNumber(), beacon.getLat(), beacon.getLon(), beacon.getAlt(),
+                            beacon.getRawPacket());
+                else
+                    igcLogger.log(beacon.getId(), beacon.getLat(), beacon.getLon(), beacon.getAlt(),
+                            beacon.getRawPacket());
+            }// if
 
             out.println("*********************************************");
         }

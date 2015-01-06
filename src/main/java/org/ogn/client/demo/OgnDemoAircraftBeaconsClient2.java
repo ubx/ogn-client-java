@@ -18,10 +18,11 @@ import org.ogn.commons.beacon.AircraftDescriptor;
 import org.ogn.commons.beacon.descriptor.AircraftDescriptorProvider;
 import org.ogn.commons.beacon.impl.AircraftDescriptorImpl;
 import org.ogn.commons.flarm.FlarmNetDescriptorProvider;
+import org.ogn.commons.igc.IgcLogger;
 import org.ogn.commons.utils.JsonUtils;
 
 /**
- * A small demo program demonstrating the usage of the ogn-client with aircraft descriptor providers
+ * A small demo program demonstrating the usage of the ogn-client with aircraft descriptor providers.
  * 
  * @author wbuczak
  */
@@ -33,7 +34,13 @@ public class OgnDemoAircraftBeaconsClient2 {
         System.setProperty(OgnClientProperties.PROP_OGN_CLIENT_IGNORE_RECEIVER_BEACONS, "true");
     }
 
+    static IgcLogger igcLogger = new IgcLogger();
+
+    // enable if you want to log to IGC files
+    static boolean logIGC = false;
+
     static class AcListener implements AircraftBeaconListener {
+
         @Override
         public void onUpdate(AircraftBeacon beacon, AircraftDescriptor descriptor) {
             out.println("*********************************************");
@@ -46,13 +53,23 @@ public class OgnDemoAircraftBeaconsClient2 {
                 out.println(JsonUtils.toJson(descriptor));
             }
 
+            if (logIGC) {
+
+                if (descriptor.isKnown())
+                    igcLogger.log(descriptor.getRegNumber(), beacon.getLat(), beacon.getLon(), beacon.getAlt(),
+                            beacon.getRawPacket());
+                else
+                    igcLogger.log(beacon.getId(), beacon.getLat(), beacon.getLon(), beacon.getAlt(),
+                            beacon.getRawPacket());
+            }// if
+
             out.println("*********************************************");
         }
     }
 
     /**
-     * A custom descriptor provider. For the use of this demo this custom descriptor provider always returns the
-     * same descriptor, no matter what address is passed to it
+     * A custom descriptor provider. For the use of this demo this custom descriptor provider always returns the same
+     * descriptor, no matter what address is passed to it
      * 
      * @author wbuczak
      */
@@ -77,8 +94,11 @@ public class OgnDemoAircraftBeaconsClient2 {
         // put the two descriptors into a list
         // NOTE: the order matters. The OGN client will try to query for the aircraft information the first provider
         // in the list. Only if no match is found it will continue with the second provider etc..
-        List<AircraftDescriptorProvider> aircraftDescProviders = Arrays.asList(new AircraftDescriptorProvider[] { adp, adp2
-                });
+        List<AircraftDescriptorProvider> aircraftDescProviders = Arrays.asList(new AircraftDescriptorProvider[] { adp /*
+                                                                                                                       * ,
+                                                                                                                       * adp2
+                                                                                                                       */
+        });
 
         // create ogn client and give it the previously created descriptor providers
         OgnClient client = OgnClientFactory.createClient(aircraftDescProviders);
@@ -86,6 +106,9 @@ public class OgnDemoAircraftBeaconsClient2 {
         System.out.println("connecting...");
 
         client.connect();
+
+        // germany
+        // client.connect("r/+52.882/+8.959/100");
 
         client.subscribeToAircraftBeacons(new AcListener());
 
