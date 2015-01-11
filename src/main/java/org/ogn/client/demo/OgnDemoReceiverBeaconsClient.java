@@ -29,8 +29,6 @@ public class OgnDemoReceiverBeaconsClient {
     static class RbListener implements ReceiverBeaconListener {
         @Override
         public void onUpdate(ReceiverBeacon beacon) {
-            // if (beacon.getId().equals("LeNoiray"))
-            if (beacon.getNumericVersion() > 0)
             out.println(JsonUtils.toJson(beacon));
         }
     }
