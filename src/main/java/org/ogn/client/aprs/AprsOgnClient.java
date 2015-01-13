@@ -222,12 +222,18 @@ public class AprsOgnClient implements OgnClient {
                     continue;
                 }
 
-                OgnBeacon beacon = AprsLineParser.get().parse(aprsLine, processAircraftBeacons, processReceiverBeacons);
+                try {
 
-                // a beacon may be null in case in hasn't been parsed correctly or
-                // if a receivers or aircraft beacons parsing is disabled by user
-                if (beacon != null) {
-                    notifyAllListeners(beacon);
+                    OgnBeacon beacon = AprsLineParser.get().parse(aprsLine, processAircraftBeacons,
+                            processReceiverBeacons);
+
+                    // a beacon may be null in case in hasn't been parsed correctly or
+                    // if a receivers or aircraft beacons parsing is disabled by user
+                    if (beacon != null) {
+                        notifyAllListeners(beacon);
+                    }
+                } catch (Exception ex) {
+                    PLOG.warn("exception caught", ex);
                 }
             }// while
             PLOG.trace("exiting..");
