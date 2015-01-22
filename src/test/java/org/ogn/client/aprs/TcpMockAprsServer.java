@@ -78,16 +78,16 @@ public class TcpMockAprsServer {
         @Override
         public void run() {
             LOG.debug("starting the server..");
-            Socket connectionSocket = null;
-            ServerSocket welcomeSocket = null;
+            Socket clientSocket = null;
+            ServerSocket serverSocket = null;
             try {
                 while (!Thread.interrupted()) {
                     String clientSentence;
-                    welcomeSocket = new ServerSocket(port);
-                    connectionSocket = welcomeSocket.accept();
+                    serverSocket = new ServerSocket(port);
+                    clientSocket = serverSocket.accept();                    
                     BufferedReader inFromClient = new BufferedReader(new InputStreamReader(
-                            connectionSocket.getInputStream()));
-                    DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
+                            clientSocket.getInputStream()));
+                    DataOutputStream outToClient = new DataOutputStream(clientSocket.getOutputStream());
                     clientSentence = inFromClient.readLine();
 
                     // remember client sentence
@@ -104,7 +104,7 @@ public class TcpMockAprsServer {
                         }
                     } while (loopMessages);
 
-                    welcomeSocket.close();
+                    serverSocket.close();
                     LOG.info("connection terminated");
 
                 }// while
@@ -114,10 +114,10 @@ public class TcpMockAprsServer {
                 LOG.debug("server interrupted");
             } finally {
                 try {
-                    if (welcomeSocket != null)
-                        welcomeSocket.close();
-                    if (connectionSocket != null)
-                        connectionSocket.close();
+                    if (serverSocket != null)
+                        serverSocket.close();
+                    if (clientSocket != null)
+                        clientSocket.close();
                 } catch (IOException e) {
                     // nothing to be done here apart from logging
                     LOG.warn("exception caught", e);
