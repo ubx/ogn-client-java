@@ -7,10 +7,10 @@ package org.ogn.client.aprs;
 import static org.ogn.client.OgnClientConstants.OGN_CLIENT_DEFAULT_KEEP_ALIVE_INTERVAL_MS;
 import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_APP_NAME;
 import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_APP_VERSION;
-import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_APRS_PORT;
-import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_APRS_PORT_FILTERED;
 import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_RECONNECTION_TIMEOUT_MS;
 import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_SERVER_NAME;
+import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_SRV_PORT;
+import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_SRV_PORT_FILTERED;
 import static org.ogn.commons.utils.AprsUtils.formatAprsLoginLine;
 import static org.ogn.commons.utils.AprsUtils.generateClientId;
 
@@ -242,9 +242,9 @@ public class AprsOgnClient implements OgnClient {
     }
 
     private AprsOgnClient(Builder builder) {
-        this.aprsServerName = builder.aprsServerName;
-        this.aprsPort = builder.aprsPort;
-        this.aprsPortFiltered = builder.aprsPortFiltered;
+        this.aprsServerName = builder.srvName;
+        this.aprsPort = builder.srvPort;
+        this.aprsPortFiltered = builder.srvPortFiltered;
         this.reconnectionTimeout = builder.reconnectionTimeout;
         this.keepAlive = builder.keepAlive;
         this.appName = builder.appName;
@@ -260,9 +260,9 @@ public class AprsOgnClient implements OgnClient {
     }
 
     public static class Builder {
-        private String aprsServerName = OGN_DEFAULT_SERVER_NAME;
-        private int aprsPort = OGN_DEFAULT_APRS_PORT;
-        private int aprsPortFiltered = OGN_DEFAULT_APRS_PORT_FILTERED;
+        private String srvName = OGN_DEFAULT_SERVER_NAME;
+        private int srvPort = OGN_DEFAULT_SRV_PORT;
+        private int srvPortFiltered = OGN_DEFAULT_SRV_PORT_FILTERED;
         private int reconnectionTimeout = OGN_DEFAULT_RECONNECTION_TIMEOUT_MS;
         private int keepAlive = OGN_CLIENT_DEFAULT_KEEP_ALIVE_INTERVAL_MS;
         private String appName = OGN_DEFAULT_APP_NAME;
@@ -273,17 +273,17 @@ public class AprsOgnClient implements OgnClient {
         private List<AircraftDescriptorProvider> descriptorProviders;
 
         public Builder serverName(final String name) {
-            this.aprsServerName = name;
+            this.srvName = name;
             return this;
         }
 
-        public Builder aprsPort(final int port) {
-            this.aprsPort = port;
+        public Builder port(final int port) {
+            this.srvPort = port;
             return this;
         }
 
-        public Builder aprsPortFiltered(final int port) {
-            this.aprsPortFiltered = port;
+        public Builder portFiltered(final int port) {
+            this.srvPortFiltered = port;
             return this;
         }
 
@@ -333,6 +333,12 @@ public class AprsOgnClient implements OgnClient {
 
     private BlockingQueue<String> aprsLines = new LinkedBlockingQueue<>();
 
+    /**
+     * connects to the OGN APRS service
+     * 
+     * @param filter optional filter, if null no filter will be used, as it is in case of {@link #connect() connect()}.
+     * @see <a href="http://www.aprs-is.net/javAPRSFilter.aspx">Server-side Filter Commands</a>
+     */
     @Override
     public synchronized void connect(final String aprsFilter) {
         if (socketListenerFuture == null) {

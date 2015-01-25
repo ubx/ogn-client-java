@@ -7,10 +7,10 @@ package org.ogn.client;
 import static org.ogn.client.OgnClientConstants.OGN_CLIENT_DEFAULT_KEEP_ALIVE_INTERVAL_MS;
 import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_APP_NAME;
 import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_APP_VERSION;
-import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_APRS_PORT;
-import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_APRS_PORT_FILTERED;
 import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_RECONNECTION_TIMEOUT_MS;
 import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_SERVER_NAME;
+import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_SRV_PORT;
+import static org.ogn.client.OgnClientConstants.OGN_DEFAULT_SRV_PORT_FILTERED;
 import static org.ogn.client.OgnClientProperties.PROP_OGN_CLIENT_APP_NAME;
 import static org.ogn.client.OgnClientProperties.PROP_OGN_CLIENT_APP_VERSION;
 import static org.ogn.client.OgnClientProperties.PROP_OGN_CLIENT_IGNORE_AIRCRAFT_BEACONS;
@@ -35,8 +35,8 @@ public class OgnClientFactory {
 
     private static String serverName = System.getProperty(PROP_OGN_SRV_NAME, OGN_DEFAULT_SERVER_NAME);
 
-    private static int port = Integer.getInteger(PROP_OGN_SRV_PORT_UNFILTERED, OGN_DEFAULT_APRS_PORT);
-    private static int portFiltered = Integer.getInteger(PROP_OGN_SRV_PORT_FILTERED, OGN_DEFAULT_APRS_PORT_FILTERED);
+    private static int port = Integer.getInteger(PROP_OGN_SRV_PORT_UNFILTERED, OGN_DEFAULT_SRV_PORT);
+    private static int portFiltered = Integer.getInteger(PROP_OGN_SRV_PORT_FILTERED, OGN_DEFAULT_SRV_PORT_FILTERED);
     private static int reconnectionTimeout = Integer.getInteger(PROP_OGN_SRV_RECONNECTION_TIMEOUT,
             OGN_DEFAULT_RECONNECTION_TIMEOUT_MS);
 
@@ -50,7 +50,7 @@ public class OgnClientFactory {
     private static boolean ignoreAircraftBeacons = System.getProperty(PROP_OGN_CLIENT_IGNORE_AIRCRAFT_BEACONS) != null;
 
     private static AprsOgnClient.Builder getBuilder() {
-        return new AprsOgnClient.Builder().serverName(serverName).aprsPort(port).aprsPortFiltered(portFiltered)
+        return new AprsOgnClient.Builder().serverName(serverName).port(port).portFiltered(portFiltered)
                 .reconnectionTimeout(reconnectionTimeout).appName(appName).appVersion(appVersion)
                 .keepAlive(keepAliveInterval).ignoreReceiverBeacons(ignoreReceiverBeacons)
                 .ignoreAicraftrBeacons(ignoreAircraftBeacons);

@@ -35,21 +35,19 @@ public interface OgnClient {
     void unsubscribeFromReceiverBeacons(ReceiverBeaconListener listener);
 
     /**
-     * connects the client to the OGN APRS service (no filtering)
+     * connects the client to the OGN service (no filtering)
      */
     void connect();
 
     /**
-     * connects to the OGN APRS service
+     * connects to the OGN service
      * 
-     * @param aprsFilter optional APRS filter, if null no filter will be used, as it is in case of {@link #connect()
-     *            connect()}.
-     * @see <a href="http://www.aprs-is.net/javAPRSFilter.aspx">Server-side Filter Commands</a>
+     * @param filter optional filter, if null no filter will be used, as it is in case of {@link #connect() 
      */
-    void connect(String aprsFilter);
+    void connect(String filter);
 
     /**
-     * disconnects a client from the OGN APRS service
+     * disconnects a client from the OGN service
      */
     void disconnect();
 }
