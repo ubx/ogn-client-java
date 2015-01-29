@@ -402,7 +402,7 @@ public class AprsOgnClient implements OgnClient {
         AircraftDescriptor result = AircraftDescriptorImpl.UNKNOWN_AIRCRAFT_DESCRIPTOR;
         if (descriptorProviders != null) {
             for (AircraftDescriptorProvider provider : descriptorProviders) {
-                AircraftDescriptor ad = provider.getDescritor(beacon.getAddress());
+                AircraftDescriptor ad = provider.findDescriptor(beacon.getAddress());
                 if (ad != null) {
                     result = ad;
                     break;
