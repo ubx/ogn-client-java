@@ -17,7 +17,9 @@ import org.ogn.commons.beacon.AircraftBeacon;
 import org.ogn.commons.beacon.AircraftDescriptor;
 import org.ogn.commons.beacon.descriptor.AircraftDescriptorProvider;
 import org.ogn.commons.beacon.impl.AircraftDescriptorImpl;
-import org.ogn.commons.flarm.FlarmNetDescriptorProvider;
+import org.ogn.commons.db.FileDbDescriptorProvider;
+import org.ogn.commons.db.flarmnet.FlarmNetDb;
+import org.ogn.commons.db.ogn.OgnDb;
 import org.ogn.commons.igc.IgcLogger;
 import org.ogn.commons.utils.JsonUtils;
 
@@ -78,7 +80,7 @@ public class OgnDemoAircraftBeaconsClient2 {
         @Override
         public AircraftDescriptor findDescriptor(String address) {
             // return always the same descriptor (just for this demo)
-            return new AircraftDescriptorImpl("SP-NZA", "ZA", "Private", "EPML", "Cessna 172S", "122.500");
+            return new AircraftDescriptorImpl("SP-NZA", "ZA", "Cessna 172S", true, true);
         }
 
     }
@@ -86,16 +88,19 @@ public class OgnDemoAircraftBeaconsClient2 {
     public static void main(String[] args) throws Exception {
 
         // create an instance of FlarmNet descriptor provider
-        AircraftDescriptorProvider adp = new FlarmNetDescriptorProvider();
+        AircraftDescriptorProvider adp1 = new FileDbDescriptorProvider<FlarmNetDb>(FlarmNetDb.class);
+
+        // create an instance of OGN descriptor provider
+        AircraftDescriptorProvider adp2 = new FileDbDescriptorProvider<OgnDb>(OgnDb.class);
 
         // create an instance of "custom" descriptor provider
-        AircraftDescriptorProvider adp2 = new MyCustomAircraftDescriptorProvider();
+        AircraftDescriptorProvider adp3 = new MyCustomAircraftDescriptorProvider();
 
         // put the two descriptors into a list
         // NOTE: the order matters. The OGN client will try to query for the aircraft information the first provider
         // in the list. Only if no match is found it will continue with the second provider etc..
-        List<AircraftDescriptorProvider> aircraftDescProviders = Arrays.asList(new AircraftDescriptorProvider[] { adp,
-                adp2 });
+        List<AircraftDescriptorProvider> aircraftDescProviders = Arrays.asList(new AircraftDescriptorProvider[] { adp1,
+                adp2, adp3 });
 
         // create ogn client and give it the previously created descriptor providers
         OgnClient client = OgnClientFactory.createClient(aircraftDescProviders);
