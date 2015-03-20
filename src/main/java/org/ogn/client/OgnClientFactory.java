@@ -21,6 +21,7 @@ import static org.ogn.client.OgnClientProperties.PROP_OGN_SRV_PORT_FILTERED;
 import static org.ogn.client.OgnClientProperties.PROP_OGN_SRV_PORT_UNFILTERED;
 import static org.ogn.client.OgnClientProperties.PROP_OGN_SRV_RECONNECTION_TIMEOUT;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.ogn.client.aprs.AprsOgnClient;
@@ -61,7 +62,11 @@ public class OgnClientFactory {
     }
 
     public static OgnClient createClient(List<AircraftDescriptorProvider> aircraftDescriptorProviders) {
-        return getBuilder().setAircraftDescriptorProviders(aircraftDescriptorProviders).build();
+        return getBuilder().descriptorProviders(aircraftDescriptorProviders).build();
+    }
+
+    public static OgnClient createClient(AircraftDescriptorProvider... aircraftDescriptorProviders) {
+        return getBuilder().descriptorProviders(Arrays.asList(aircraftDescriptorProviders)).build();
     }
 
 }
