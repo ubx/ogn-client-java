@@ -70,16 +70,19 @@ public class OgnDemoAircraftBeaconsClient3 {
         AircraftDescriptorProvider adp = new FileDbDescriptorProvider<OgnDb>(OgnDb.class);
 
         // create ogn client and pass it a reference to the previously created descriptor provider
-        OgnClient client = OgnClientFactory.createClient();
+        OgnClient client1 = OgnClientFactory.createClient();
 
+        // create second instance of OGN client, this one will connect to a different port
         OgnClient client2 = OgnClientFactory.getBuilder().port(OgnClientConstants.OGN_DEFAULT_SRV_PORT + 1000)
                 .descriptorProviders(adp).build();
 
         System.out.println("connecting...");
-        client.connect();
-        client2.connect();
+        client1.connect();
 
-        client.subscribeToAircraftBeacons(new AcListener());
+        // set some filter to the second instance of OGN client
+        client2.connect("r/+49.782/+19.450/200");
+
+        client1.subscribeToAircraftBeacons(new AcListener());
         client2.subscribeToAircraftBeacons(new AcListener());
 
         Thread.sleep(Long.MAX_VALUE);
