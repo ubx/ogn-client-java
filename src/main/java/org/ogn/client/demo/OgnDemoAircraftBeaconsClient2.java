@@ -6,9 +6,6 @@ package org.ogn.client.demo;
 
 import static java.lang.System.out;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.ogn.client.AircraftBeaconListener;
 import org.ogn.client.OgnClient;
 import org.ogn.client.OgnClientFactory;
@@ -96,14 +93,10 @@ public class OgnDemoAircraftBeaconsClient2 {
         // create an instance of "custom" descriptor provider
         AircraftDescriptorProvider adp3 = new MyCustomAircraftDescriptorProvider();
 
-        // put the two descriptors into a list
         // NOTE: the order matters. The OGN client will try to query for the aircraft information the first provider
         // in the list. Only if no match is found it will continue with the second provider etc..
-        List<AircraftDescriptorProvider> aircraftDescProviders = Arrays.asList(new AircraftDescriptorProvider[] { adp1,
-                adp2, adp3 });
-
         // create ogn client and give it the previously created descriptor providers
-        OgnClient client = OgnClientFactory.createClient(aircraftDescProviders);
+        OgnClient client = OgnClientFactory.createClient(new AircraftDescriptorProvider[] { adp1, adp2, adp3 });
 
         System.out.println("connecting...");
 
