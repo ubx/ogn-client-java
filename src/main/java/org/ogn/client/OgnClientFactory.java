@@ -49,7 +49,7 @@ public class OgnClientFactory {
     private static boolean ignoreReceiverBeacons = System.getProperty(PROP_OGN_CLIENT_IGNORE_RECEIVER_BEACONS) != null;
     private static boolean ignoreAircraftBeacons = System.getProperty(PROP_OGN_CLIENT_IGNORE_AIRCRAFT_BEACONS) != null;
 
-    private static AprsOgnClient.Builder getBuilder() {
+    public static AprsOgnClient.Builder getBuilder() {
         return new AprsOgnClient.Builder().serverName(serverName).port(port).portFiltered(portFiltered)
                 .reconnectionTimeout(reconnectionTimeout).appName(appName).appVersion(appVersion)
                 .keepAlive(keepAliveInterval).ignoreReceiverBeacons(ignoreReceiverBeacons)
