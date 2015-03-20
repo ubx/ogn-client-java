@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -317,8 +318,13 @@ public class AprsOgnClient implements OgnClient {
             return this;
         }
 
-        public Builder setAircraftDescriptorProviders(List<AircraftDescriptorProvider> descriptorProviders) {
-            this.descriptorProviders = descriptorProviders;
+        public Builder descriptorProviders(List<AircraftDescriptorProvider> descProviders) {
+            this.descriptorProviders = descProviders;
+            return this;
+        }
+
+        public Builder descriptorProviders(AircraftDescriptorProvider... descProviders) {
+            this.descriptorProviders = Arrays.asList(descProviders);
             return this;
         }
 
