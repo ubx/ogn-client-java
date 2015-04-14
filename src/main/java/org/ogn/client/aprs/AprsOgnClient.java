@@ -216,7 +216,7 @@ public class AprsOgnClient implements OgnClient {
 
                 try {
                     aprsLine = aprsLines.take();
-                    PLOG.debug(aprsLine);
+                    PLOG.trace(aprsLine);
                 } catch (InterruptedException e) {
                     PLOG.warn("interrupted exception caught. Was the poller task interrupted on purpose?");
                     Thread.currentThread().interrupt();
