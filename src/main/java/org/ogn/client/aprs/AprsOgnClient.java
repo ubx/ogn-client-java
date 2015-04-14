@@ -156,7 +156,7 @@ public class AprsOgnClient implements OgnClient {
             }// while
 
             closeSocket();
-            SLLOG.debug("stoped.");
+            SLLOG.debug("stopped.");
 
         }// run
 
