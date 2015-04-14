@@ -183,7 +183,7 @@ public class AprsOgnClient implements OgnClient {
                             LOG.debug("sending keep-alive message: {}", keepAliveMsg);
                             out.println(keepAliveMsg);
                         } catch (Exception ex) {
-                            LOG.warn("exception caught while tryint to send keep-alive msg", ex);
+                            LOG.warn("exception caught while trying to send keep-alive msg", ex);
                         }
                     }
                 }, 0, keepAlive, TimeUnit.MILLISECONDS);
