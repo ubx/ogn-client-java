@@ -132,6 +132,7 @@ public class AprsOgnClient implements OgnClient {
                     while (!interrupted && (line = in.readLine()) != null) {
                         if (Thread.currentThread().isInterrupted()) {
                             interrupted = true;
+                            SLLOG.warn("The AprsSocketListenerTask thread has been interrupted");
                             break;
                         }
 
@@ -149,7 +150,6 @@ public class AprsOgnClient implements OgnClient {
                     }
                 } finally {
                     closeSocket();
-
                     stopKeepAliveThread();
                 }
 
