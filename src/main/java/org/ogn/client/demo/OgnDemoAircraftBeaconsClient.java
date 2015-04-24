@@ -13,6 +13,7 @@ import org.ogn.client.OgnClientProperties;
 import org.ogn.commons.beacon.AircraftBeacon;
 import org.ogn.commons.beacon.AircraftDescriptor;
 import org.ogn.commons.igc.IgcLogger;
+import org.ogn.commons.utils.IgcUtils;
 import org.ogn.commons.utils.JsonUtils;
 
 /**
@@ -37,6 +38,7 @@ public class OgnDemoAircraftBeaconsClient {
 
         @Override
         public void onUpdate(AircraftBeacon beacon, AircraftDescriptor descriptor) {
+
             out.println("*********************************************");
 
             // print the beacon
@@ -48,13 +50,8 @@ public class OgnDemoAircraftBeaconsClient {
             }
 
             if (logIGC) {
-
-                if (descriptor.isKnown())
-                    igcLogger.log(descriptor.getRegNumber(), beacon.getLat(), beacon.getLon(), beacon.getAlt(),
-                            beacon.getRawPacket());
-                else
-                    igcLogger.log(beacon.getId(), beacon.getLat(), beacon.getLon(), beacon.getAlt(),
-                            beacon.getRawPacket());
+                String igcId = IgcUtils.toIgcLogFileId(beacon, descriptor);
+                igcLogger.log(igcId, beacon.getLat(), beacon.getLon(), beacon.getAlt(), beacon.getRawPacket());
             }// if
 
             out.println("*********************************************");

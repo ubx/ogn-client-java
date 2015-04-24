@@ -17,6 +17,7 @@ import org.ogn.commons.beacon.descriptor.AircraftDescriptorProvider;
 import org.ogn.commons.db.FileDbDescriptorProvider;
 import org.ogn.commons.db.ogn.OgnDb;
 import org.ogn.commons.igc.IgcLogger;
+import org.ogn.commons.utils.IgcUtils;
 import org.ogn.commons.utils.JsonUtils;
 
 /**
@@ -52,13 +53,8 @@ public class OgnDemoAircraftBeaconsClient3 {
             }
 
             if (logIGC) {
-
-                if (descriptor.isKnown())
-                    igcLogger.log(descriptor.getRegNumber(), beacon.getLat(), beacon.getLon(), beacon.getAlt(),
-                            beacon.getRawPacket());
-                else
-                    igcLogger.log(beacon.getId(), beacon.getLat(), beacon.getLon(), beacon.getAlt(),
-                            beacon.getRawPacket());
+                String igcId = IgcUtils.toIgcLogFileId(beacon, descriptor);
+                igcLogger.log(igcId, beacon.getLat(), beacon.getLon(), beacon.getAlt(), beacon.getRawPacket());
             }// if
 
             out.println("*********************************************");
@@ -80,7 +76,7 @@ public class OgnDemoAircraftBeaconsClient3 {
         client1.connect();
 
         // set some filter to the second instance of OGN client
-        client2.connect("r/+49.782/+19.450/200");
+        client2.connect("r/+49.782/+19.450/100");
 
         client1.subscribeToAircraftBeacons(new AcListener());
         client2.subscribeToAircraftBeacons(new AcListener());

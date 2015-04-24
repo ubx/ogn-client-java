@@ -18,6 +18,7 @@ import org.ogn.commons.db.FileDbDescriptorProvider;
 import org.ogn.commons.db.flarmnet.FlarmNetDb;
 import org.ogn.commons.db.ogn.OgnDb;
 import org.ogn.commons.igc.IgcLogger;
+import org.ogn.commons.utils.IgcUtils;
 import org.ogn.commons.utils.JsonUtils;
 
 /**
@@ -53,13 +54,8 @@ public class OgnDemoAircraftBeaconsClient2 {
             }
 
             if (logIGC) {
-
-                if (descriptor.isKnown())
-                    igcLogger.log(descriptor.getRegNumber(), beacon.getLat(), beacon.getLon(), beacon.getAlt(),
-                            beacon.getRawPacket());
-                else
-                    igcLogger.log(beacon.getId(), beacon.getLat(), beacon.getLon(), beacon.getAlt(),
-                            beacon.getRawPacket());
+                String igcId = IgcUtils.toIgcLogFileId(beacon, descriptor);
+                igcLogger.log(igcId, beacon.getLat(), beacon.getLon(), beacon.getAlt(), beacon.getRawPacket());
             }// if
 
             out.println("*********************************************");
@@ -88,7 +84,7 @@ public class OgnDemoAircraftBeaconsClient2 {
         AircraftDescriptorProvider adp1 = new FileDbDescriptorProvider<FlarmNetDb>(FlarmNetDb.class);
 
         // create an instance of OGN descriptor provider
-        AircraftDescriptorProvider adp2 = new FileDbDescriptorProvider<OgnDb>(OgnDb.class);
+        AircraftDescriptorProvider adp2 = new FileDbDescriptorProvider<OgnDb>(OgnDb.class, 10);
 
         // create an instance of "custom" descriptor provider
         AircraftDescriptorProvider adp3 = new MyCustomAircraftDescriptorProvider();
@@ -96,12 +92,15 @@ public class OgnDemoAircraftBeaconsClient2 {
         // NOTE: the order matters. The OGN client will try to query for the aircraft information the first provider
         // in the list. Only if no match is found it will continue with the second provider etc..
         // create ogn client and give it the previously created descriptor providers
-        OgnClient client = OgnClientFactory.createClient(new AircraftDescriptorProvider[] { adp1, adp2, adp3 });
+        OgnClient client = OgnClientFactory
+                .createClient(new AircraftDescriptorProvider[] { /* adp1, */adp2 /* , adp3 */});
 
         System.out.println("connecting...");
 
         // connect with no filter
         client.connect();
+
+        // client.connect("r/+49.98284/+20.09165/100");
 
         client.subscribeToAircraftBeacons(new AcListener());
 

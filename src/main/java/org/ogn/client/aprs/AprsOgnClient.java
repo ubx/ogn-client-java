@@ -233,7 +233,7 @@ public class AprsOgnClient implements OgnClient {
                     if (beacon != null) {
                         notifyAllListeners(beacon);
                     }
-                } catch (Exception ex) {
+                } catch (Exception ex) {                    
                     PLOG.warn("exception caught", ex);
                 }
             }// while
