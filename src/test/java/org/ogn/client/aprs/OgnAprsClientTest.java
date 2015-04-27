@@ -10,6 +10,7 @@ import static org.ogn.client.OgnClientProperties.PROP_OGN_SRV_PORT_UNFILTERED;
 import static org.ogn.client.OgnClientProperties.PROP_OGN_SRV_RECONNECTION_TIMEOUT;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,8 +62,8 @@ public class OgnAprsClientTest {
     @BeforeClass
     public static void classSetUp() throws Exception {
 
-        BufferedReader br = new BufferedReader(new InputStreamReader(
-                OgnAprsClientTest.class.getResourceAsStream("server-sentences.txt"), "UTF-8"));
+        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("server-sentences.txt");
+        BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 
         String line;
         while ((line = br.readLine()) != null) {
