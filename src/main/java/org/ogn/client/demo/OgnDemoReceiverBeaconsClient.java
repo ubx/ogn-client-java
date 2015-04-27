@@ -29,19 +29,15 @@ public class OgnDemoReceiverBeaconsClient {
 
     static class RbListener implements ReceiverBeaconListener {
         @Override
-        public void onUpdate(ReceiverBeacon beacon) {
+        public void onUpdate(ReceiverBeacon beacon, String rawBeacon) {
             out.println(JsonUtils.toJson(beacon));
         }
     }
 
     public static void main(String[] args) throws Exception {
-        //OgnClient client = OgnClientFactory.createClient();
-        
-        OgnClient client = OgnClientFactory.getBuilder().port(OgnClientConstants.OGN_DEFAULT_SRV_PORT + 1000)
-                .build();
+        // OgnClient client = OgnClientFactory.createClient();
 
-     
-
+        OgnClient client = OgnClientFactory.getBuilder().port(OgnClientConstants.OGN_DEFAULT_SRV_PORT + 1000).build();
 
         System.out.println("connecting...");
         // client.connect("r/+51.537/+5.472/250");

@@ -231,9 +231,9 @@ public class AprsOgnClient implements OgnClient {
                     // a beacon may be null in case in hasn't been parsed correctly or
                     // if a receivers or aircraft beacons parsing is disabled by user
                     if (beacon != null) {
-                        notifyAllListeners(beacon);
+                        notifyAllListeners(beacon, aprsLine);
                     }
-                } catch (Exception ex) {                    
+                } catch (Exception ex) {
                     PLOG.warn("exception caught", ex);
                 }
             }// while
@@ -419,18 +419,18 @@ public class AprsOgnClient implements OgnClient {
         return result;
     }
 
-    private <T extends OgnBeacon> void notifyAllListeners(T ognBeacon) {
+    private <T extends OgnBeacon> void notifyAllListeners(final T ognBeacon, final String rawBeacon) {
         if (ognBeacon instanceof AircraftBeacon) {
             for (AircraftBeaconListener listener : acBeaconListeners) {
                 AircraftBeacon ab = (AircraftBeacon) ognBeacon;
                 AircraftDescriptor descriptor = findAircraftDescriptor(ab);
 
-                listener.onUpdate(ab, descriptor);
+                listener.onUpdate(ab, descriptor, rawBeacon);
             }
 
         } else if (ognBeacon instanceof ReceiverBeacon) {
             for (ReceiverBeaconListener listener : brBeaconListeners) {
-                listener.onUpdate((ReceiverBeacon) ognBeacon);
+                listener.onUpdate((ReceiverBeacon) ognBeacon, rawBeacon);
             }
         } else {
             LOG.warn("unrecognized beacon type: {} .ignoring..", ognBeacon.getClass().getName());

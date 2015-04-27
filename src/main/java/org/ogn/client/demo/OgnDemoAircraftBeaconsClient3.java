@@ -41,7 +41,7 @@ public class OgnDemoAircraftBeaconsClient3 {
     static class AcListener implements AircraftBeaconListener {
 
         @Override
-        public void onUpdate(AircraftBeacon beacon, AircraftDescriptor descriptor) {
+        public void onUpdate(AircraftBeacon beacon, AircraftDescriptor descriptor, String rawBeacon) {
             out.println("*********************************************");
 
             // print the beacon
