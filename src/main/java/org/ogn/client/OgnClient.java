@@ -42,7 +42,7 @@ public interface OgnClient {
     /**
      * connects to the OGN service
      * 
-     * @param filter optional filter, if null no filter will be used, as it is in case of {@link #connect() 
+     * @param filter optional filter, if null no filter will be used, as it is in case of {@link #connect()} 
      */
     void connect(String filter);
 

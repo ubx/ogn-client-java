@@ -346,12 +346,12 @@ public class AprsOgnClient implements OgnClient {
      * @see <a href="http://www.aprs-is.net/javAPRSFilter.aspx">Server-side Filter Commands</a>
      */
     @Override
-    public synchronized void connect(final String aprsFilter) {
+    public synchronized void connect(final String filter) {
         if (socketListenerFuture == null) {
             executor = Executors.newCachedThreadPool();
             scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
             pollerFuture = executor.submit(new PollerTask());
-            socketListenerFuture = executor.submit(new AprsSocketListenerTask(aprsFilter));
+            socketListenerFuture = executor.submit(new AprsSocketListenerTask(filter));
         } else {
             LOG.warn("client is currently connected and running. stop it first!");
         }
