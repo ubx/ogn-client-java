@@ -13,7 +13,6 @@ import org.ogn.client.OgnClientProperties;
 import org.ogn.commons.beacon.AircraftBeacon;
 import org.ogn.commons.beacon.AircraftDescriptor;
 import org.ogn.commons.igc.IgcLogger;
-import org.ogn.commons.utils.IgcUtils;
 import org.ogn.commons.utils.JsonUtils;
 
 /**
@@ -23,54 +22,56 @@ import org.ogn.commons.utils.JsonUtils;
  */
 public class OgnDemoAircraftBeaconsClient {
 
-    static {
-        // ignore parsing receiver beacons, we are not interested in them in this demo and there is
-        // no point in wasting CPU on that
-        System.setProperty(OgnClientProperties.PROP_OGN_CLIENT_IGNORE_RECEIVER_BEACONS, "true");
-    }
+	static {
+		// ignore parsing receiver beacons, we are not interested in them in
+		// this demo and there is
+		// no point in wasting CPU on that
+		System.setProperty(
+				OgnClientProperties.PROP_OGN_CLIENT_IGNORE_RECEIVER_BEACONS,
+				"true");
+	}
 
-    static IgcLogger igcLogger = new IgcLogger();
+	static IgcLogger igcLogger = new IgcLogger();
 
-    // enable if you want to log to IGC files
-    static boolean logIGC = false;
+	// enable if you want to log to IGC files
+	static boolean logIGC = false;
 
-    static class AcListener implements AircraftBeaconListener {
+	static class AcListener implements AircraftBeaconListener {
 
-        @Override
-        public void onUpdate(AircraftBeacon beacon, AircraftDescriptor descriptor, String rawBeacon) {
+		@Override
+		public void onUpdate(AircraftBeacon beacon,
+				AircraftDescriptor descriptor, String rawBeacon) {
 
-            out.println("*********************************************");
+			out.println("*********************************************");
 
-            // print the beacon
-            out.println(JsonUtils.toJson(beacon));
+			// print the beacon
+			out.println(JsonUtils.toJson(beacon));
 
-            // if the aircraft has been recognized print its descriptor too
-            if (descriptor.isKnown()) {
-                out.println(JsonUtils.toJson(descriptor));
-            }
+			// if the aircraft has been recognized print its descriptor too
+			if (descriptor.isKnown()) {
+				out.println(JsonUtils.toJson(descriptor));
+			}
 
-            if (logIGC) {
-                String igcId = IgcUtils.toIgcLogFileId(beacon, descriptor);
-                igcLogger.log(igcId, beacon.getLat(), beacon.getLon(), beacon.getAlt(), beacon.getRawPacket());
-            }// if
+			if (logIGC)
+				igcLogger.log(beacon, descriptor);
 
-            out.println("*********************************************");
-        }
-    }
+			out.println("*********************************************");
+		}
+	}
 
-    public static void main(String[] args) throws Exception {
-        OgnClient client = OgnClientFactory.createClient();
+	public static void main(String[] args) throws Exception {
+		OgnClient client = OgnClientFactory.createClient();
 
-        System.out.println("connecting...");
+		System.out.println("connecting...");
 
-        // client.connect("r/+51.537/+5.472/250");
-        // client.connect("r/+49.782/+19.450/200");
+		// client.connect("r/+51.537/+5.472/250");
+		// client.connect("r/+49.782/+19.450/200");
 
-        client.connect();
+		client.connect();
 
-        client.subscribeToAircraftBeacons(new AcListener());
+		client.subscribeToAircraftBeacons(new AcListener());
 
-        Thread.sleep(Long.MAX_VALUE);
-    }
+		Thread.sleep(Long.MAX_VALUE);
+	}
 
 }
