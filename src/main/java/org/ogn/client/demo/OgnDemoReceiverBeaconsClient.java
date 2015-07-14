@@ -7,7 +7,6 @@ package org.ogn.client.demo;
 import static java.lang.System.out;
 
 import org.ogn.client.OgnClient;
-import org.ogn.client.OgnClientConstants;
 import org.ogn.client.OgnClientFactory;
 import org.ogn.client.OgnClientProperties;
 import org.ogn.client.ReceiverBeaconListener;
