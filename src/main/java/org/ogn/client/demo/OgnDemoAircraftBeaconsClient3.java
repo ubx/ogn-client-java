@@ -31,7 +31,9 @@ public class OgnDemoAircraftBeaconsClient3 {
 		// ignore parsing receiver beacons, we are not interested in them in
 		// this demo and there is
 		// no point in wasting CPU on that
-		System.setProperty(OgnClientProperties.PROP_OGN_CLIENT_IGNORE_RECEIVER_BEACONS, "true");
+		System.setProperty(
+				OgnClientProperties.PROP_OGN_CLIENT_IGNORE_RECEIVER_BEACONS,
+				"true");
 	}
 
 	static IgcLogger igcLogger = new IgcLogger();
@@ -42,7 +44,8 @@ public class OgnDemoAircraftBeaconsClient3 {
 	static class AcListener implements AircraftBeaconListener {
 
 		@Override
-		public void onUpdate(AircraftBeacon beacon, AircraftDescriptor descriptor, String rawBeacon) {
+		public void onUpdate(AircraftBeacon beacon,
+				AircraftDescriptor descriptor, String rawBeacon) {
 			out.println("*********************************************");
 
 			// print the beacon
@@ -62,7 +65,8 @@ public class OgnDemoAircraftBeaconsClient3 {
 
 	public static void main(String[] args) throws Exception {
 
-		AircraftDescriptorProvider adp = new FileDbDescriptorProvider<OgnDb>(OgnDb.class);
+		AircraftDescriptorProvider adp = new FileDbDescriptorProvider<OgnDb>(
+				OgnDb.class);
 
 		// create ogn client and pass it a reference to the previously created
 		// descriptor provider
@@ -70,7 +74,8 @@ public class OgnDemoAircraftBeaconsClient3 {
 
 		// create second instance of OGN client, this one will connect to a
 		// different port
-		OgnClient client2 = OgnClientFactory.getBuilder().port(OgnClientConstants.OGN_DEFAULT_SRV_PORT + 1000)
+		OgnClient client2 = OgnClientFactory.getBuilder()
+				.port(OgnClientConstants.OGN_DEFAULT_SRV_PORT + 1000)
 				.descriptorProviders(adp).build();
 
 		System.out.println("connecting...");

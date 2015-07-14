@@ -32,7 +32,9 @@ public class OgnDemoAircraftBeaconsClient2 {
 		// ignore parsing receiver beacons, we are not interested in them in
 		// this demo and there is
 		// no point in wasting CPU on that
-		System.setProperty(OgnClientProperties.PROP_OGN_CLIENT_IGNORE_RECEIVER_BEACONS, "true");
+		System.setProperty(
+				OgnClientProperties.PROP_OGN_CLIENT_IGNORE_RECEIVER_BEACONS,
+				"true");
 	}
 
 	static IgcLogger igcLogger = new IgcLogger();
@@ -43,7 +45,8 @@ public class OgnDemoAircraftBeaconsClient2 {
 	static class AcListener implements AircraftBeaconListener {
 
 		@Override
-		public void onUpdate(AircraftBeacon beacon, AircraftDescriptor descriptor, String rawBeacon) {
+		public void onUpdate(AircraftBeacon beacon,
+				AircraftDescriptor descriptor, String rawBeacon) {
 			out.println("*********************************************");
 
 			// print the beacon
@@ -68,12 +71,14 @@ public class OgnDemoAircraftBeaconsClient2 {
 	 * 
 	 * @author wbuczak
 	 */
-	static class MyCustomAircraftDescriptorProvider implements AircraftDescriptorProvider {
+	static class MyCustomAircraftDescriptorProvider implements
+			AircraftDescriptorProvider {
 
 		@Override
 		public AircraftDescriptor findDescriptor(String address) {
 			// return always the same descriptor (just for this demo)
-			return new AircraftDescriptorImpl("SP-NZA", "ZA", "Cessna 172S", true, true);
+			return new AircraftDescriptorImpl("SP-NZA", "ZA", "Cessna 172S",
+					true, true);
 		}
 
 	}
@@ -81,10 +86,12 @@ public class OgnDemoAircraftBeaconsClient2 {
 	public static void main(String[] args) throws Exception {
 
 		// create an instance of FlarmNet descriptor provider
-		AircraftDescriptorProvider adp1 = new FileDbDescriptorProvider<FlarmNetDb>(FlarmNetDb.class);
+		AircraftDescriptorProvider adp1 = new FileDbDescriptorProvider<FlarmNetDb>(
+				FlarmNetDb.class);
 
 		// create an instance of OGN descriptor provider
-		AircraftDescriptorProvider adp2 = new FileDbDescriptorProvider<OgnDb>(OgnDb.class, 10);
+		AircraftDescriptorProvider adp2 = new FileDbDescriptorProvider<OgnDb>(
+				OgnDb.class, 10);
 
 		// create an instance of "custom" descriptor provider
 		AircraftDescriptorProvider adp3 = new MyCustomAircraftDescriptorProvider();
@@ -95,13 +102,11 @@ public class OgnDemoAircraftBeaconsClient2 {
 		// second provider etc..
 		// create ogn client and give it the previously created descriptor
 		// providers
-		OgnClient client = OgnClientFactory.createClient(new AircraftDescriptorProvider[] { /*
-																							 * adp1
-																							 * ,
-																							 */adp2 /*
-																									 * ,
-																									 * adp3
-																									 */});
+		OgnClient client = OgnClientFactory
+				.createClient(new AircraftDescriptorProvider[] { /* adp1, */adp2 /*
+																				 * ,
+																				 * adp3
+																				 */});
 
 		System.out.println("connecting...");
 
