@@ -24,9 +24,7 @@ public class OgnDemoReceiverBeaconsClient {
 		// ignore parsing aircraft beacons, we are not interested in them in
 		// this demo and there is
 		// no point in wasting CPU on that
-		System.setProperty(
-				OgnClientProperties.PROP_OGN_CLIENT_IGNORE_AIRCRAFT_BEACONS,
-				"true");
+		System.setProperty(OgnClientProperties.PROP_OGN_CLIENT_IGNORE_AIRCRAFT_BEACONS, "true");
 	}
 
 	static class RbListener implements ReceiverBeaconListener {

@@ -26,9 +26,7 @@ public class OgnDemoAircraftBeaconsClient {
 		// ignore parsing receiver beacons, we are not interested in them in
 		// this demo and there is
 		// no point in wasting CPU on that
-		System.setProperty(
-				OgnClientProperties.PROP_OGN_CLIENT_IGNORE_RECEIVER_BEACONS,
-				"true");
+		System.setProperty(OgnClientProperties.PROP_OGN_CLIENT_IGNORE_RECEIVER_BEACONS, "true");
 	}
 
 	static IgcLogger igcLogger = new IgcLogger();
@@ -39,8 +37,7 @@ public class OgnDemoAircraftBeaconsClient {
 	static class AcListener implements AircraftBeaconListener {
 
 		@Override
-		public void onUpdate(AircraftBeacon beacon,
-				AircraftDescriptor descriptor, String rawBeacon) {
+		public void onUpdate(AircraftBeacon beacon, AircraftDescriptor descriptor, String rawBeacon) {
 
 			out.println("*********************************************");
 
