@@ -230,9 +230,8 @@ public class AprsOgnClient implements OgnClient {
 							processReceiverBeacons);
 
 					// a beacon may be null in case in hasn't been parsed
-					// correctly or
-					// if a receivers or aircraft beacons parsing is disabled by
-					// user
+					// correctly or if a receiver or aircraft beacon parsing is
+					// disabled by user
 					if (beacon != null) {
 						notifyAllListeners(beacon, aprsLine);
 					}
@@ -433,12 +432,12 @@ public class AprsOgnClient implements OgnClient {
 				AircraftBeacon ab = (AircraftBeacon) ognBeacon;
 				AircraftDescriptor descriptor = findAircraftDescriptor(ab);
 
-				listener.onUpdate(ab, descriptor, rawBeacon);
+				listener.onUpdate(ab, descriptor);
 			}
 
 		} else if (ognBeacon instanceof ReceiverBeacon) {
 			for (ReceiverBeaconListener listener : brBeaconListeners) {
-				listener.onUpdate((ReceiverBeacon) ognBeacon, rawBeacon);
+				listener.onUpdate((ReceiverBeacon) ognBeacon);
 			}
 		} else {
 			LOG.warn("unrecognized beacon type: {} .ignoring..", ognBeacon.getClass().getName());

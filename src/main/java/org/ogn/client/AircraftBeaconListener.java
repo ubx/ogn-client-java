@@ -23,8 +23,6 @@ public interface AircraftBeaconListener {
 	 *            will return false. It is up to the implementing class to
 	 *            verify if descriptor is "known", as in case of unknown
 	 *            descriptor its attributes are lilely to be null.
-	 * @param rawBeacon
-	 *            raw beacon as received from the remote system
 	 */
-	void onUpdate(final AircraftBeacon beacon, final AircraftDescriptor descriptor, final String rawBeacon);
+	void onUpdate(final AircraftBeacon beacon, final AircraftDescriptor descriptor);
 }

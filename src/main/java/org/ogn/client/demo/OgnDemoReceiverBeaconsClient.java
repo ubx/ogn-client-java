@@ -29,7 +29,7 @@ public class OgnDemoReceiverBeaconsClient {
 
 	static class RbListener implements ReceiverBeaconListener {
 		@Override
-		public void onUpdate(ReceiverBeacon beacon, String rawBeacon) {
+		public void onUpdate(ReceiverBeacon beacon) {
 			out.println(JsonUtils.toJson(beacon));
 		}
 	}

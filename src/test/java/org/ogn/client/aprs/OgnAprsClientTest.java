@@ -45,7 +45,7 @@ public class OgnAprsClientTest {
 		List<AircraftBeacon> beacons = new ArrayList<>();
 
 		@Override
-		public void onUpdate(AircraftBeacon beacon, AircraftDescriptor descriptor, String rawBeacon) {
+		public void onUpdate(AircraftBeacon beacon, AircraftDescriptor descriptor) {
 			beacons.add(beacon);
 		}
 	}
@@ -54,7 +54,7 @@ public class OgnAprsClientTest {
 		List<ReceiverBeacon> beacons = new ArrayList<>();
 
 		@Override
-		public void onUpdate(ReceiverBeacon beacon, String rawBeacon) {
+		public void onUpdate(ReceiverBeacon beacon) {
 			beacons.add(beacon);
 		}
 	}
