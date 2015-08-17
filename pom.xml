@@ -61,9 +61,9 @@
 					<aggregate>true</aggregate>
 					<show>public</show>
 					<nohelp>true</nohelp>
-					<header>${artifactId}, ${project.version}</header>
+					<header>${project.artifactId}, ${project.version}</header>
 					<footer>${project.name}</footer>
-					<doctitle>${artifactId}, ${project.version}</doctitle>
+					<doctitle>${project.artifactId}, ${project.version}</doctitle>
 				</configuration>
 			</plugin>
 
