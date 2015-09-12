@@ -85,8 +85,9 @@ public class OgnAprsClientTest {
 		aprsServer.runOneCycle();
 		Thread.sleep(2000);
 
-		OgnClient client = OgnClientFactory.createClient();
+		OgnClient client = OgnClientFactory.createClient();		
 		client.connect();
+		client.disconnect();
 		client.connect();
 
 		AcListener acListener = new AcListener();

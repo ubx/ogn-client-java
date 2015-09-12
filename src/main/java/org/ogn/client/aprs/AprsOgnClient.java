@@ -55,8 +55,7 @@ public class AprsOgnClient implements OgnClient {
 	/**
 	 * read only pass-code
 	 * 
-	 * @see <a href="http://www.aprs-is.net/Connecting.aspx">Connecting to
-	 *      APRS-IS</a>
+	 * @see <a href="http://www.aprs-is.net/Connecting.aspx">Connecting to APRS-IS</a>
 	 */
 	private static final String READ_ONLY_PASSCODE = "-1";
 
@@ -347,10 +346,8 @@ public class AprsOgnClient implements OgnClient {
 	 * connects to the OGN APRS service
 	 * 
 	 * @param filter
-	 *            optional filter, if null no filter will be used, as it is in
-	 *            case of {@link #connect() connect()}.
-	 * @see <a href="http://www.aprs-is.net/javAPRSFilter.aspx">Server-side
-	 *      Filter Commands</a>
+	 *            optional filter, if null no filter will be used, as it is in case of {@link #connect() connect()}.
+	 * @see <a href="http://www.aprs-is.net/javAPRSFilter.aspx">Server-side Filter Commands</a>
 	 */
 	@Override
 	public synchronized void connect(final String filter) {
@@ -373,14 +370,20 @@ public class AprsOgnClient implements OgnClient {
 	public synchronized void disconnect() {
 		if (socketListenerFuture != null) {
 
-			socketListenerFuture.cancel(true);
-			socketListenerFuture = null;
+			if (socketListenerFuture != null) {
+				socketListenerFuture.cancel(true);
+				socketListenerFuture = null;
+			}
 
-			pollerFuture.cancel(true);
-			pollerFuture = null;
+			if (pollerFuture != null) {
+				pollerFuture.cancel(true);
+				pollerFuture = null;
+			}
 
-			keepAliveFuture.cancel(true);
-			keepAliveFuture = null;
+			if (keepAliveFuture != null) {
+				keepAliveFuture.cancel(true);
+				keepAliveFuture = null;
+			}
 		}
 
 		if (executor != null)
