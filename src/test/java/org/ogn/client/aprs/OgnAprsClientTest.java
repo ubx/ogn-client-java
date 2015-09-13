@@ -5,6 +5,7 @@
 package org.ogn.client.aprs;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.ogn.client.OgnClientProperties.PROP_OGN_SRV_NAME;
 import static org.ogn.client.OgnClientProperties.PROP_OGN_SRV_PORT_UNFILTERED;
 import static org.ogn.client.OgnClientProperties.PROP_OGN_SRV_RECONNECTION_TIMEOUT;
@@ -85,7 +86,7 @@ public class OgnAprsClientTest {
 		aprsServer.runOneCycle();
 		Thread.sleep(2000);
 
-		OgnClient client = OgnClientFactory.createClient();		
+		OgnClient client = OgnClientFactory.createClient();
 		client.connect();
 		client.disconnect();
 		client.connect();
@@ -112,6 +113,65 @@ public class OgnAprsClientTest {
 		// make sure all receiver beacons have been received
 		assertEquals(2, rbListener.beacons.size());
 		client.disconnect();
+	}
+
+	@Test
+	public void test2() throws Exception {
+		aprsServer = new TcpMockAprsServer(APRS_SRV_PORT, serverSentences, 300);
+		aprsServer.runOneCycle();
+		Thread.sleep(2000);
+
+		final OgnClient client = OgnClientFactory.createClient();
+
+		final Runnable r1 = new Runnable() {
+
+			@Override
+			public void run() {
+				for (int i = 0; i < 10; i++) {
+					try {
+						client.connect();
+					} catch (NullPointerException ex) {
+						fail("NPE was not expected!");
+					}
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+
+		};
+
+		final Runnable r2 = new Runnable() {
+
+			@Override
+			public void run() {
+				for (int i = 0; i < 10; i++) {
+
+					try {
+						client.disconnect();
+					} catch (NullPointerException ex) {
+						fail("NPE was not expected!");
+					}
+					try {
+						Thread.sleep(80);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+
+		};
+
+		Thread t1 = new Thread(r1);
+		Thread t2 = new Thread(r2);
+
+		t1.start();
+		t2.start();
+
+		t1.join();
+		t2.join();
 	}
 
 	@After
