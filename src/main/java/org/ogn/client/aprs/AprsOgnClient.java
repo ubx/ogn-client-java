@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -38,7 +39,6 @@ import org.ogn.commons.beacon.AircraftDescriptor;
 import org.ogn.commons.beacon.OgnBeacon;
 import org.ogn.commons.beacon.ReceiverBeacon;
 import org.ogn.commons.beacon.descriptor.AircraftDescriptorProvider;
-import org.ogn.commons.beacon.impl.AircraftDescriptorImpl;
 import org.ogn.commons.beacon.impl.aprs.AprsLineParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,39 +50,39 @@ import org.slf4j.LoggerFactory;
  */
 public class AprsOgnClient implements OgnClient {
 
-	private static Logger LOG = LoggerFactory.getLogger(AprsOgnClient.class);
+	private static Logger					LOG					= LoggerFactory.getLogger(AprsOgnClient.class);
 
 	/**
 	 * read only pass-code
 	 * 
 	 * @see <a href="http://www.aprs-is.net/Connecting.aspx">Connecting to APRS-IS</a>
 	 */
-	private static final String READ_ONLY_PASSCODE = "-1";
+	private static final String				READ_ONLY_PASSCODE	= "-1";
 
-	private String aprsServerName;
-	private int aprsPort;
-	private int aprsPortFiltered;
-	private int reconnectionTimeout;
-	private int keepAlive;
-	private String appName;
-	private String appVersion;
-	private boolean processReceiverBeacons;
-	private boolean processAircraftBeacons;
+	private String							aprsServerName;
+	private int								aprsPort;
+	private int								aprsPortFiltered;
+	private int								reconnectionTimeout;
+	private int								keepAlive;
+	private String							appName;
+	private String							appVersion;
+	private boolean							processReceiverBeacons;
+	private boolean							processAircraftBeacons;
 
-	private AircraftDescriptorProvider[] descriptorProviders;
+	private AircraftDescriptorProvider[]	descriptorProviders;
 
-	private ExecutorService executor;
-	private ScheduledExecutorService scheduledExecutor;
+	private ExecutorService					executor;
+	private ScheduledExecutorService		scheduledExecutor;
 
-	private volatile Future<?> socketListenerFuture;
-	private volatile Future<?> pollerFuture;
-	private volatile Future<?> keepAliveFuture;
+	private volatile Future<?>				socketListenerFuture;
+	private volatile Future<?>				pollerFuture;
+	private volatile Future<?>				keepAliveFuture;
 
 	private class AprsSocketListenerTask implements Runnable {
-		private Logger SLLOG = LoggerFactory.getLogger(AprsSocketListenerTask.class);
-		private String aprsFilter;
+		private Logger	SLLOG	= LoggerFactory.getLogger(AprsSocketListenerTask.class);
+		private String	aprsFilter;
 
-		private Socket socket;
+		private Socket	socket;
 
 		public AprsSocketListenerTask(final String aprsFilter) {
 			this.aprsFilter = aprsFilter;
@@ -109,8 +109,8 @@ public class AprsOgnClient implements OgnClient {
 						loginSentence = formatAprsLoginLine(clientId, READ_ONLY_PASSCODE, appName, appVersion);
 					} else {
 						port = aprsPortFiltered;
-						loginSentence = formatAprsLoginLine(clientId, READ_ONLY_PASSCODE, appName, appVersion,
-								aprsFilter);
+						loginSentence =
+								formatAprsLoginLine(clientId, READ_ONLY_PASSCODE, appName, appVersion, aprsFilter);
 					}
 
 					// if filter is specified connect to a different port
@@ -136,6 +136,7 @@ public class AprsOgnClient implements OgnClient {
 							break;
 						}
 
+						// System.out.println(line);
 						processAprsLine(line);
 					}
 
@@ -153,7 +154,7 @@ public class AprsOgnClient implements OgnClient {
 					stopKeepAliveThread();
 				}
 
-			}// while
+			} // while
 
 			closeSocket();
 			SLLOG.debug("stopped.");
@@ -161,8 +162,8 @@ public class AprsOgnClient implements OgnClient {
 		}// run
 
 		/**
-         * 
-         */
+		 * 
+		 */
 		private void stopKeepAliveThread() {
 			if (keepAliveFuture != null) {
 				keepAliveFuture.cancel(true);
@@ -170,8 +171,8 @@ public class AprsOgnClient implements OgnClient {
 		}
 
 		/**
-         * 
-         */
+		 * 
+		 */
 		private void startKeepAliveThread(final PrintWriter out, final String msg) {
 			if (keepAliveFuture == null || keepAliveFuture.isCancelled()) {
 				keepAliveFuture = scheduledExecutor.scheduleAtFixedRate(new Runnable() {
@@ -225,8 +226,8 @@ public class AprsOgnClient implements OgnClient {
 
 				try {
 
-					OgnBeacon beacon = AprsLineParser.get().parse(aprsLine, processAircraftBeacons,
-							processReceiverBeacons);
+					OgnBeacon beacon =
+							AprsLineParser.get().parse(aprsLine, processAircraftBeacons, processReceiverBeacons);
 
 					// a beacon may be null in case in hasn't been parsed
 					// correctly or if a receiver or aircraft beacon parsing is
@@ -237,7 +238,7 @@ public class AprsOgnClient implements OgnClient {
 				} catch (Exception ex) {
 					PLOG.warn("exception caught", ex);
 				}
-			}// while
+			} // while
 			PLOG.trace("exiting..");
 		}
 
@@ -264,17 +265,17 @@ public class AprsOgnClient implements OgnClient {
 	}
 
 	public static class Builder {
-		private String srvName = OGN_DEFAULT_SERVER_NAME;
-		private int srvPort = OGN_DEFAULT_SRV_PORT;
-		private int srvPortFiltered = OGN_DEFAULT_SRV_PORT_FILTERED;
-		private int reconnectionTimeout = OGN_DEFAULT_RECONNECTION_TIMEOUT_MS;
-		private int keepAlive = OGN_CLIENT_DEFAULT_KEEP_ALIVE_INTERVAL_MS;
-		private String appName = OGN_DEFAULT_APP_NAME;
-		private String appVersion = OGN_DEFAULT_APP_VERSION;
-		private boolean ignoreReceiverBeacons = false;
-		private boolean ignoreAircraftBeacons = false;
+		private String								srvName					= OGN_DEFAULT_SERVER_NAME;
+		private int									srvPort					= OGN_DEFAULT_SRV_PORT;
+		private int									srvPortFiltered			= OGN_DEFAULT_SRV_PORT_FILTERED;
+		private int									reconnectionTimeout		= OGN_DEFAULT_RECONNECTION_TIMEOUT_MS;
+		private int									keepAlive				= OGN_CLIENT_DEFAULT_KEEP_ALIVE_INTERVAL_MS;
+		private String								appName					= OGN_DEFAULT_APP_NAME;
+		private String								appVersion				= OGN_DEFAULT_APP_VERSION;
+		private boolean								ignoreReceiverBeacons	= false;
+		private boolean								ignoreAircraftBeacons	= false;
 
-		private List<AircraftDescriptorProvider> descriptorProviders;
+		private List<AircraftDescriptorProvider>	descriptorProviders;
 
 		public Builder serverName(final String name) {
 			this.srvName = name;
@@ -337,10 +338,10 @@ public class AprsOgnClient implements OgnClient {
 
 	}
 
-	private CopyOnWriteArrayList<AircraftBeaconListener> acBeaconListeners = new CopyOnWriteArrayList<>();
-	private CopyOnWriteArrayList<ReceiverBeaconListener> brBeaconListeners = new CopyOnWriteArrayList<>();
+	private CopyOnWriteArrayList<AircraftBeaconListener>	acBeaconListeners	= new CopyOnWriteArrayList<>();
+	private CopyOnWriteArrayList<ReceiverBeaconListener>	brBeaconListeners	= new CopyOnWriteArrayList<>();
 
-	private BlockingQueue<String> aprsLines = new LinkedBlockingQueue<>();
+	private BlockingQueue<String>							aprsLines			= new LinkedBlockingQueue<>();
 
 	/**
 	 * connects to the OGN APRS service
@@ -414,16 +415,16 @@ public class AprsOgnClient implements OgnClient {
 		brBeaconListeners.remove(listener);
 	}
 
-	private AircraftDescriptor findAircraftDescriptor(AircraftBeacon beacon) {
-		AircraftDescriptor result = AircraftDescriptorImpl.UNKNOWN_AIRCRAFT_DESCRIPTOR;
+	private Optional<AircraftDescriptor> findAircraftDescriptor(AircraftBeacon beacon) {
+		Optional<AircraftDescriptor> result = Optional.empty();
 		if (descriptorProviders != null) {
 			for (AircraftDescriptorProvider provider : descriptorProviders) {
-				AircraftDescriptor ad = provider.findDescriptor(beacon.getAddress());
+				Optional<AircraftDescriptor> ad = provider.findDescriptor(beacon.getAddress());
 				if (ad != null) {
 					result = ad;
 					break;
 				}
-			}// for
+			} // for
 		}
 
 		return result;
@@ -433,7 +434,7 @@ public class AprsOgnClient implements OgnClient {
 		if (ognBeacon instanceof AircraftBeacon) {
 			for (AircraftBeaconListener listener : acBeaconListeners) {
 				AircraftBeacon ab = (AircraftBeacon) ognBeacon;
-				AircraftDescriptor descriptor = findAircraftDescriptor(ab);
+				Optional<AircraftDescriptor> descriptor = findAircraftDescriptor(ab);
 
 				listener.onUpdate(ab, descriptor);
 			}

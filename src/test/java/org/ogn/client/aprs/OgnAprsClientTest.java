@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.After;
 import org.junit.Before;
@@ -46,7 +47,7 @@ public class OgnAprsClientTest {
 		List<AircraftBeacon> beacons = new ArrayList<>();
 
 		@Override
-		public void onUpdate(AircraftBeacon beacon, AircraftDescriptor descriptor) {
+		public void onUpdate(AircraftBeacon beacon, Optional<AircraftDescriptor> descriptor) {
 			beacons.add(beacon);
 		}
 	}

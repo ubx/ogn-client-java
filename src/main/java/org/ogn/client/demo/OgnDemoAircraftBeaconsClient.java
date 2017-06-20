@@ -6,6 +6,8 @@ package org.ogn.client.demo;
 
 import static java.lang.System.out;
 
+import java.util.Optional;
+
 import org.ogn.client.AircraftBeaconListener;
 import org.ogn.client.OgnClient;
 import org.ogn.client.OgnClientFactory;
@@ -37,7 +39,7 @@ public class OgnDemoAircraftBeaconsClient {
 	static class AcListener implements AircraftBeaconListener {
 
 		@Override
-		public void onUpdate(AircraftBeacon beacon, AircraftDescriptor descriptor) {
+		public void onUpdate(AircraftBeacon beacon, Optional<AircraftDescriptor> descriptor) {
 
 			out.println("*********************************************");
 
@@ -45,7 +47,7 @@ public class OgnDemoAircraftBeaconsClient {
 			out.println(JsonUtils.toJson(beacon));
 
 			// if the aircraft has been recognized print its descriptor too
-			if (descriptor.isKnown()) {
+			if (descriptor.isPresent()) {
 				out.println(JsonUtils.toJson(descriptor));
 			}
 
