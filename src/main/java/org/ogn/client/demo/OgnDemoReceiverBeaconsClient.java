@@ -38,8 +38,7 @@ public class OgnDemoReceiverBeaconsClient {
 		OgnClient client = OgnClientFactory.createClient();
 
 		// OgnClient client =
-		// OgnClientFactory.getBuilder().port(OgnClientConstants.OGN_DEFAULT_SRV_PORT
-		// + 1000).build();
+		// OgnClientFactory.getBuilder().port(OgnClientConstants.OGN_DEFAULT_SRV_PORT + 1000).build();
 
 		System.out.println("connecting...");
 		// client.connect("r/+51.537/+5.472/250");

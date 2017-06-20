@@ -51,7 +51,7 @@ public class OgnDemoAircraftBeaconsClient3 {
 
 			// if the aircraft has been recognized print its descriptor too
 			if (descriptor.isPresent()) {
-				out.println(JsonUtils.toJson(descriptor));
+				out.println(JsonUtils.toJson(descriptor.get()));
 			}
 
 			if (logIGC)

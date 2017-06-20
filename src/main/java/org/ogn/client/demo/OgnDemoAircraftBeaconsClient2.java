@@ -51,7 +51,7 @@ public class OgnDemoAircraftBeaconsClient2 {
 
 			// if the aircraft has been recognized print its descriptor too
 			if (descriptor.isPresent()) {
-				out.println(JsonUtils.toJson(descriptor));
+				out.println(JsonUtils.toJson(descriptor.get()));
 			}
 
 			if (logIGC)
@@ -89,7 +89,7 @@ public class OgnDemoAircraftBeaconsClient2 {
 		// NOTE: the order matters. The OGN client will try to query for the
 		// aircraft information the first provider in the list. Only if no match is found it will continue with the
 		// second provider etc..
-		// create ogn client and give it the previously created descriptor providers
+		// Create ogn client and give it the previously created descriptor providers
 		OgnClient client = OgnClientFactory.createClient(new AircraftDescriptorProvider[]{adp1, adp2});
 
 		System.out.println("connecting...");
